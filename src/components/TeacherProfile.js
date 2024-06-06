@@ -11,7 +11,7 @@ const TeacherProfile = () => {
     useEffect(() => {
         const fetchTeacher = async () => {
             try {
-                const response = await axios.get(`/api/teachers/${teacherId}`, {
+                const response = await axios.get(`http://localhost:3001/api/teachers/${teacherId}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     },
@@ -31,7 +31,7 @@ const TeacherProfile = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete('/api/teachers/deleteteacher', {
+            await axios.delete(`http://localhost:3001/api/teachers/${teacherId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -46,7 +46,7 @@ const TeacherProfile = () => {
     return (
         <Container>
             <Paper sx={{ padding: 3 }}>
-                <Avatar src={teacher.ImageFile} sx={{ width: 100, height: 100 }} />
+                <Avatar src={`data:image/jpeg;base64,${teacher.ImageFile}`} sx={{ width: 100, height: 100 }} />
                 <Typography variant="h4">{teacher.Name}</Typography>
                 <Typography variant="h6">{teacher.Title}</Typography>
                 <Typography variant="body1">{teacher.Overview}</Typography>

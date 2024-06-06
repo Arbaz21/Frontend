@@ -31,6 +31,7 @@ const LoginPage = () => {
 
                 // Handle response
                 alert(response.data.msg); // Display success message
+                localStorage.setItem('token', response.data.token); // Store the token in localStorage
                 navigate('/home'); // Redirect to home page upon successful login
             } catch (error) {
                 console.error('Error during login:', error);
