@@ -11,7 +11,7 @@ const TeacherForm = () => {
         Title: '',
         Email: '',
         Overview: '',
-        CoursesTaught: '',
+        CoursesTaught: [],
         Department: '',
         Specialization: '',
         OnboardStatus: '',
@@ -30,7 +30,10 @@ const TeacherForm = () => {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`,
                         },
                     });
-                    setInitialValues(response.data);
+                    setInitialValues({
+                        ...response.data,
+                        CoursesTaught: response.data['Courses Taught'].join(', ')
+                    });
                 } catch (error) {
                     console.error("Error fetching teacher", error);
                 }
@@ -45,6 +48,7 @@ const TeacherForm = () => {
             <Paper sx={{ padding: 3 }}>
                 <Typography variant="h4" gutterBottom>{teacherId ? 'Edit Teacher' : 'Add Teacher'}</Typography>
                 <Formik
+                    enableReinitialize
                     initialValues={initialValues}
                     validationSchema={Yup.object({
                         Name: Yup.string().required('Required'),
@@ -53,14 +57,19 @@ const TeacherForm = () => {
                     })}
                     onSubmit={async (values, { setSubmitting }) => {
                         try {
+                            const payload = {
+                                ...values,
+                                CoursesTaught: values.CoursesTaught.split(',').map(course => course.trim())
+                            };
+
                             if (teacherId) {
-                                await axios.patch('/api/teachers/updateTeacher', { id: teacherId, ...values }, {
+                                await axios.patch('/api/teachers/updateTeacher', { id: teacherId, ...payload }, {
                                     headers: {
                                         'Authorization': `Bearer ${localStorage.getItem('token')}`,
                                     },
                                 });
                             } else {
-                                await axios.post('/api/teachers/createTeacher', values, {
+                                await axios.post('/api/teachers/createTeacher', payload, {
                                     headers: {
                                         'Authorization': `Bearer ${localStorage.getItem('token')}`,
                                     },
@@ -117,7 +126,7 @@ const TeacherForm = () => {
                             />
                             <TextField
                                 name="CoursesTaught"
-                                label="Courses Taught"
+                                label="Courses Taught (comma separated)"
                                 fullWidth
                                 margin="dense"
                                 value={values.CoursesTaught}
