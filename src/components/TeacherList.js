@@ -1,50 +1,85 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Typography, Grid, Paper, Avatar, Button } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Container, Typography, Grid, Paper, Avatar, Button, Box, TextField, InputAdornment } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import SearchIcon from '@mui/icons-material/Search';
+import debounce from 'lodash.debounce';
 
 const TeacherList = () => {
     const [teachers, setTeachers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [searchInput, setSearchInput] = useState(''); // For instant UI updates
+    const [searchTerm, setSearchTerm] = useState(''); // For debounced API call
     const navigate = useNavigate();
 
-    const fetchTeachers = async (page) => {
+    // Fetch teachers with debouncing
+    const fetchTeachers = useCallback(debounce(async (page, search) => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
             if (!token) {
                 console.error("No token found");
+                setLoading(false);
                 return;
             }
 
-            console.log("Using token:", token);
-
-            const response = await axios.get(`http://localhost:3001/api/teachers/getallteachers?page=${page}`, {
+            const response = await axios.get(`http://localhost:3001/api/teachers/getallteachers`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
+                params: {
+                    page,
+                    limit: 10,
+                    search,
+                },
             });
 
-            console.log("Fetched Teachers: ", response.data);
-            setTeachers(response.data);
+            const { teachers, currentPage, totalPages } = response.data;
+
+            setTeachers(teachers);
+            setCurrentPage(currentPage);
+            setTotalPages(totalPages);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching teachers", error);
             setLoading(false);
         }
-    };
+    }, 500), []); // 500ms debounce delay
 
+    // Use useEffect to trigger the fetch when searchTerm or currentPage changes
     useEffect(() => {
-        fetchTeachers(currentPage);
-    }, [currentPage]);
+        fetchTeachers(currentPage, searchTerm);
+    }, [currentPage, searchTerm, fetchTeachers]);
 
-    const nextPage = () => {
-        setCurrentPage(currentPage + 1);
+    // Update search term with debouncing
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchInput(value);
+        setSearchTerm(value);
+        setCurrentPage(1); // Reset to first page on new search
     };
 
-    const prevPage = () => {
-        setCurrentPage(currentPage - 1);
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const renderPagination = () => {
+        const pages = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pages.push(
+                <Button
+                    key={i}
+                    variant={i === currentPage ? "contained" : "outlined"}
+                    onClick={() => handlePageChange(i)}
+                    sx={{ margin: '0 5px' }}
+                >
+                    {i}
+                </Button>
+            );
+        }
+        return pages;
     };
 
     if (loading) {
@@ -54,6 +89,22 @@ const TeacherList = () => {
     return (
         <Container>
             <Typography variant="h4" gutterBottom>Teachers</Typography>
+            <Box mb={3} display="flex" justifyContent="center">
+                <TextField
+                    placeholder="Search Teachers"
+                    value={searchInput}
+                    onChange={handleSearchChange}
+                    variant="outlined"
+                    sx={{ width: '60%' }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+            </Box>
             <Grid container spacing={3}>
                 {teachers.map((teacher) => (
                     <Grid item xs={12} md={6} key={teacher._id}>
@@ -68,10 +119,9 @@ const TeacherList = () => {
                     </Grid>
                 ))}
             </Grid>
-            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
-                <Button onClick={prevPage} disabled={currentPage === 1} style={{ marginRight: '10px' }}>Previous Page</Button>
-                <Button onClick={nextPage}>Next Page</Button>
-            </div>
+            <Box sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+                {renderPagination()}
+            </Box>
         </Container>
     );
 };

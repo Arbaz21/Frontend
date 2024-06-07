@@ -8,7 +8,8 @@ import Profile from './components/Profile';
 import TeacherList from './components/TeacherList';
 import TeacherProfile from './components/TeacherProfile';
 import TeacherForm from './components/TeacherForm';
-
+import PostPage from './components/PostPage';
+import CoursesPage from './components/CoursePage';
 
 
 
@@ -25,6 +26,8 @@ const App = () => {
                 <Route path="/teachers/:teacherId" element={<TeacherProfile />} />
                 <Route path="/teachers/add" element={<TeacherForm />} />
                 <Route path="/teachers/edit/:teacherId" element={<TeacherForm />} />
+                <Route path="/post/:postId" element={<PostPage />} />
+                <Route path="/courses" element={<CoursesPage />} />
                 
 
             </Routes>

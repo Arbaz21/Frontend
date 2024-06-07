@@ -1,79 +1,133 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Avatar, Paper, Button, Snackbar, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import { Formik, Form, Field } from 'formik';
+import {
+    Container, Typography, Grid, Avatar, Paper, Button,
+    Snackbar, TextField
+} from '@mui/material';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 
 const Profile = () => {
-    const [isEditing, setIsEditing] = useState(false);
     const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [userImage, setUserImage] = useState("/arbaz.jpg");
+    const [userImage, setUserImage] = useState(null);
     const [profileData, setProfileData] = useState({
         firstName: '',
         lastName: '',
         email: '',
         erpId: '',
-        program: '',
-        semester: '',
+        roles: [],
+        profile_picture: null,
     });
 
+    const [initialValues, setInitialValues] = useState(profileData);
+
     useEffect(() => {
-        // Fetch profile data from an API or localStorage (mocked here for testing)
-        const mockProfileData = {
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john.doe@example.com',
-            erpId: '123456',
-            program: 'Computer Science',
-            semester: 'Spring 2022',
+        const fetchProfileData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setSnackbarMessage("No token found. Please log in.");
+                    setOpenSnackbar(true);
+                    return;
+                }
+
+                const response = await axios.get('http://localhost:3001/api/users/getuserprofile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                const data = response.data;
+                const updatedProfileData = {
+                    firstName: data.firstname,
+                    lastName: data.lastname,
+                    email: data.email,
+                    erpId: data.erp,
+                    roles: data.roles || [], // Ensure roles is an array
+                    profile_picture: null,
+                };
+
+                setProfileData(updatedProfileData);
+                setInitialValues(updatedProfileData);
+
+                if (data.profile_picture) {
+                    setUserImage(data.profile_picture);
+                }
+
+            } catch (error) {
+                console.error("Error fetching profile data:", error);
+                setSnackbarMessage(error.response?.data?.msg || "Error fetching profile data");
+                setOpenSnackbar(true);
+            }
         };
-        setProfileData(mockProfileData);
+
+        fetchProfileData();
     }, []);
 
-    const handleProfileSubmit = (values) => {
-        // Mock API call to update profile data
-        setProfileData(values);
-        setOpenSnackbar(true);
-        setSnackbarMessage("Profile updated successfully");
-        setIsEditing(false);
-    };
-
-    const handlePasswordSubmit = async (values, { resetForm }) => {
+    const handleProfileSubmit = async (values, { setSubmitting }) => {
         try {
-            // Replace with your actual API endpoint
-            const response = await axios.patch('/changepassword', values, {
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+            formData.append('updated_firstname', values.firstName);
+            formData.append('updated_lastname', values.lastName);
+            if (values.profile_picture) {
+                formData.append('profile_picture', values.profile_picture);
+            }
+
+            const response = await axios.patch('http://localhost:3001/api/users/updateProfile', formData, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming the token is stored in localStorage
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
                 },
             });
-            setOpenSnackbar(true);
+
+            const data = response.data.user;
+            const updatedProfileData = {
+                firstName: data.firstname,
+                lastName: data.lastname,
+                email: data.email,
+                erpId: data.erp,
+                roles: data.roles || [], // Ensure roles is an array
+                profile_picture: null,
+            };
+
+            setProfileData(updatedProfileData);
+            setInitialValues(updatedProfileData);
+
+            if (data.profile_picture) {
+                setUserImage(data.profile_picture);
+            }
+
             setSnackbarMessage(response.data.msg);
-            setOpenPasswordDialog(false);
-            resetForm();
-        } catch (error) {
             setOpenSnackbar(true);
-            setSnackbarMessage(error.response?.data?.msg || "Error changing password");
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            setSnackbarMessage(error.response?.data?.msg || "Error updating profile");
+            setOpenSnackbar(true);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleFileChange = (event, setFieldValue) => {
+        const file = event.target.files[0];
+        if (file) {
+            // Use Formik's setFieldValue to update the field in the form state
+            setFieldValue("profile_picture", file);
+
+            // Set the user image preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setUserImage(reader.result);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
     const profileValidationSchema = Yup.object().shape({
         firstName: Yup.string().required('First Name is required'),
         lastName: Yup.string().required('Last Name is required'),
-        email: Yup.string().email('Invalid email').required('Email is required'),
-        erpId: Yup.string().required('ERP ID is required'),
-        program: Yup.string().required('Program is required'),
-        semester: Yup.string().required('Semester is required'),
-    });
-
-    const passwordValidationSchema = Yup.object().shape({
-        oldpassword: Yup.string().required('Old Password is required'),
-        newpassword: Yup.string()
-            .required('New Password is required')
-            .min(8, 'Password must be at least 8 characters long')
-            .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
-            .matches(/[0-9]/, 'Password must contain at least one number'),
     });
 
     return (
@@ -89,24 +143,35 @@ const Profile = () => {
                     My Profile
                 </Typography>
                 <Formik
-                    initialValues={profileData}
+                    initialValues={initialValues}
                     validationSchema={profileValidationSchema}
                     onSubmit={handleProfileSubmit}
                     enableReinitialize
                 >
-                    {({ values, errors, touched, handleChange }) => (
+                    {({ values, errors, touched, handleChange, setFieldValue }) => (
                         <Form>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
                                     <Avatar sx={{ width: 100, height: 100, margin: 'auto' }}>
-                                        <img src={userImage} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img src={userImage || "/default-profile.png"} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </Avatar>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(event) => handleFileChange(event, setFieldValue)}
+                                        style={{ display: 'none' }}
+                                        id="profile-picture-upload"
+                                    />
+                                    <label htmlFor="profile-picture-upload">
+                                        <Button variant="contained" component="span">
+                                            Change Profile Picture
+                                        </Button>
+                                    </label>
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <TextField
                                         name="firstName"
                                         label="First Name"
-                                        disabled={!isEditing}
                                         fullWidth
                                         value={values.firstName}
                                         onChange={handleChange}
@@ -118,7 +183,6 @@ const Profile = () => {
                                     <TextField
                                         name="lastName"
                                         label="Last Name"
-                                        disabled={!isEditing}
                                         fullWidth
                                         value={values.lastName}
                                         onChange={handleChange}
@@ -127,118 +191,24 @@ const Profile = () => {
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        name="email"
-                                        label="IBA Email"
-                                        disabled={!isEditing}
-                                        fullWidth
-                                        value={values.email}
-                                        onChange={handleChange}
-                                        error={touched.email && Boolean(errors.email)}
-                                        helperText={touched.email && errors.email}
-                                    />
+                                    <Typography variant="subtitle1"><strong>Email:</strong> {values.email}</Typography>
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        name="erpId"
-                                        label="ERP ID"
-                                        disabled={!isEditing}
-                                        fullWidth
-                                        value={values.erpId}
-                                        onChange={handleChange}
-                                        error={touched.erpId && Boolean(errors.erpId)}
-                                        helperText={touched.erpId && errors.erpId}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        name="program"
-                                        label="Program"
-                                        disabled={!isEditing}
-                                        fullWidth
-                                        value={values.program}
-                                        onChange={handleChange}
-                                        error={touched.program && Boolean(errors.program)}
-                                        helperText={touched.program && errors.program}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        name="semester"
-                                        label="Semester"
-                                        disabled={!isEditing}
-                                        fullWidth
-                                        value={values.semester}
-                                        onChange={handleChange}
-                                        error={touched.semester && Boolean(errors.semester)}
-                                        helperText={touched.semester && errors.semester}
-                                    />
+                                    <Typography variant="subtitle1"><strong>ERP ID:</strong> {values.erpId}</Typography>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    {isEditing ? (
-                                        <Button type="submit" variant="contained" color="primary">
-                                            Save
-                                        </Button>
-                                    ) : (
-                                        <>
-                                            <Button variant="contained" color="primary" onClick={() => setIsEditing(true)}>
-                                                Edit Profile
-                                            </Button>
-                                            <Button variant="contained" color="secondary" onClick={() => setOpenPasswordDialog(true)} sx={{ marginLeft: 2 }}>
-                                                Change Password
-                                            </Button>
-                                        </>
-                                    )}
+                                    <Typography variant="subtitle1"><strong>Roles:</strong> {Array.isArray(values.roles) ? values.roles.join(', ') : ''}</Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Button type="submit" variant="contained" color="primary">
+                                        Save
+                                    </Button>
                                 </Grid>
                             </Grid>
                         </Form>
                     )}
                 </Formik>
             </Paper>
-
-            <Dialog open={openPasswordDialog} onClose={() => setOpenPasswordDialog(false)}>
-                <DialogTitle>Change Password</DialogTitle>
-                <Formik
-                    initialValues={{ oldpassword: '', newpassword: '' }}
-                    validationSchema={passwordValidationSchema}
-                    onSubmit={handlePasswordSubmit}
-                >
-                    {({ errors, touched }) => (
-                        <Form>
-                            <DialogContent>
-                                <Field
-                                    as={TextField}
-                                    name="oldpassword"
-                                    label="Old Password"
-                                    type="password"
-                                    fullWidth
-                                    margin="dense"
-                                    error={touched.oldpassword && Boolean(errors.oldpassword)}
-                                    helperText={touched.oldpassword && errors.oldpassword}
-                                />
-                                <Field
-                                    as={TextField}
-                                    name="newpassword"
-                                    label="New Password"
-                                    type="password"
-                                    fullWidth
-                                    margin="dense"
-                                    error={touched.newpassword && Boolean(errors.newpassword)}
-                                    helperText={touched.newpassword && errors.newpassword}
-                                />
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={() => setOpenPasswordDialog(false)} color="primary">
-                                    Cancel
-                                </Button>
-                                <Button type="submit" color="primary">
-                                    Change Password
-                                </Button>
-                            </DialogActions>
-                        </Form>
-                    )}
-                </Formik>
-            </Dialog>
         </Container>
     );
 };

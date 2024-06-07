@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -29,8 +29,7 @@ const HomePage = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
-    const [commentText, setCommentText] = useState('');
-    const [anonymous, setAnonymous] = useState(false); // Default value for anonymous
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchUser();
@@ -110,37 +109,9 @@ const HomePage = () => {
         }
     };
 
-    const handleComment = async (postId) => {
-        try {
-            await axios.post(`http://localhost:3001/api/comments/postCommentOnPost`, {
-                post_id: postId,
-                commentText: commentText,
-                anonymous: anonymous
-            }, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            setCommentText(''); // Reset comment text after posting
-            setAnonymous(false); // Reset anonymous after posting
-            fetchPosts();
-        } catch (error) {
-            console.error(`Error commenting`, error);
-        }
-    };
-
-    const handleDeleteComment = async (commentId) => {
-        try {
-            await axios.delete('http://localhost:3001/api/comments/deletecomment', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                data: { objectId: commentId }
-            });
-            fetchPosts();
-        } catch (error) {
-            console.error("Error deleting comment", error);
-        }
-    };
-
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleString();
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString();
     };
 
     if (loading) {
@@ -220,7 +191,12 @@ const HomePage = () => {
                         {/* Display Posts */}
                         {posts.map(post => (
                             <Paper key={post._id} elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-                                <Typography variant="h5" gutterBottom>
+                                <Typography
+                                    variant="h5"
+                                    gutterBottom
+                                    onClick={() => navigate(`/post/${post._id}`)}
+                                    sx={{ cursor: 'pointer' }}
+                                >
                                     <strong>{post.title}</strong>
                                 </Typography>
                                 <ListItem alignItems="flex-start">
@@ -259,57 +235,6 @@ const HomePage = () => {
                                         )}
                                     </ListItemSecondaryAction>
                                 </ListItem>
-                                {/* Comment Form */}
-                                <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    handleComment(post._id);
-                                }}>
-                                    <TextField
-                                        name="commentText"
-                                        label="Add a comment"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={commentText}
-                                        onChange={(e) => setCommentText(e.target.value)}
-                                        margin="
-                                        normal"
-                                        sx={{ marginBottom: '20px' }}
-                                    />
-                                    <Button type="submit" variant="contained" color="error">
-                                        Comment
-                                    </Button>
-                                    <Button
-                                        onClick={() => setAnonymous(!anonymous)}
-                                        size="small"
-                                        color="error"
-                                        sx={{ marginLeft: '5px' }}
-                                    >
-                                        {anonymous ? 'Post as Myself' : 'Post Anonymously'}
-                                    </Button>
-                                </form>
-                                {/* Comment Section */}
-                                {post.comments.map(comment => (
-                                    <ListItem key={comment._id} alignItems="flex-start">
-                                        <Avatar alt={comment.name} src="/static/images/avatar/1.jpg" />
-                                        <ListItemText
-                                            primary={comment.comment}
-                                            secondary={
-                                                <>
-                                                    <Typography variant="caption" display="block" gutterBottom>
-                                                        Comment by {comment.name} • {formatDate(comment.createdAt)}
-                                                    </Typography>
-                                                </>
-                                            }
-                                        />
-                                        {user && (user.role === 'admin' || user.erp === comment.erp) && (
-                                            <ListItemSecondaryAction>
-                                                <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteComment(comment._id)}>
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </ListItemSecondaryAction>
-                                        )}
-                                    </ListItem>
-                                ))}
                             </Paper>
                         ))}
                     </Grid>
