@@ -31,7 +31,7 @@ const TeacherProfile = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`http://localhost:3001/api/teachers/${teacherId}`, {
+            await axios.delete('http://localhost:3001/api/teachers/deleteteacher', {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
