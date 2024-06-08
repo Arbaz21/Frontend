@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Paper, Typography, Alert, Box, Grid } from '@mui/material';
+import { useDispatch } from 'react-redux';
+import { TextField, Button, Container, Paper, Typography, Alert, Box, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../Slices/authSlice';
 
 const validationSchema = Yup.object({
     email: Yup.string().email('Invalid email format').required('Required'),
@@ -12,7 +13,9 @@ const validationSchema = Yup.object({
 
 const LoginPage = () => {
     const [error, setError] = useState(null);
+    const [role, setRole] = useState('User'); // Add state for role selection
     const navigate = useNavigate();
+    const dispatch = useDispatch(); // Redux dispatch
 
     const formik = useFormik({
         initialValues: {
@@ -23,19 +26,26 @@ const LoginPage = () => {
         onSubmit: async (values) => {
             setError(null);
             try {
-                // Make a POST request to your backend API
-                const response = await axios.post('http://localhost:3001/api/users/login', {
+                // Dispatch Redux action to log in the user
+                const response = await dispatch(loginUser({
                     loginUsername: values.email, // Use email as loginUsername
                     password: values.password,
-                });
+                    role, // Include the selected role
+                })).unwrap();
 
                 // Handle response
-                alert(response.data.msg); // Display success message
-                localStorage.setItem('token', response.data.token); // Store the token in localStorage
-                navigate('/home'); // Redirect to home page upon successful login
-            } catch (error) {
-                console.error('Error during login:', error);
-                setError(error.response?.data?.msg || 'Login failed. Please try again.');
+                const { user } = response;
+                alert('Login successful!');
+
+                // Role-based redirection
+                if (role === 'Admin' && user.roles.includes('Admin')) {
+                    navigate('/admin'); // Redirect to admin dashboard if role is Admin
+                } else {
+                    navigate('/home'); // Redirect to user home page if role is User
+                }
+            } catch (err) {
+                console.error('Error during login:', err);
+                setError(err.message || 'Login failed. Please try again.');
             }
         },
     });
@@ -83,6 +93,19 @@ const LoginPage = () => {
                                     error={formik.touched.password && Boolean(formik.errors.password)}
                                     helperText={formik.touched.password && formik.errors.password}
                                 />
+                                {/* Add role selection dropdown */}
+                                <FormControl variant="outlined" fullWidth>
+                                    <InputLabel id="role-select-label">Role</InputLabel>
+                                    <Select
+                                        labelId="role-select-label"
+                                        value={role}
+                                        onChange={(e) => setRole(e.target.value)}
+                                        label="Role"
+                                    >
+                                        <MenuItem value="User">User</MenuItem>
+                                        <MenuItem value="Admin">Admin</MenuItem>
+                                    </Select>
+                                </FormControl>
                                 <Button type="submit" variant="contained" color="primary">Login</Button>
                             </form>
                             <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '16px' }}>
