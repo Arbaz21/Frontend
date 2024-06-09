@@ -9,7 +9,7 @@ import teacherReducer from './slices/teacherSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
-    courses: courseReducer,
+    course: courseReducer,
     post: postReducer, // Should match the key you use in useSelector
     profile: profileReducer,
     teachers: teacherReducer,

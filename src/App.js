@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -9,6 +8,7 @@ import Profile from './components/Profile';
 import TeacherList from './components/TeacherList';
 import TeacherProfile from './components/TeacherProfile';
 import CoursePage from './components/CoursePage';
+import CourseDetailsPage from './components/CourseDetailsPage'; // Add CourseDetailsPage import
 import PostPage from './components/PostPage';
 import { fetchUser } from './slices/authSlice';
 import Sidebar from './common/Sidebar';
@@ -47,6 +47,7 @@ const App = () => {
             <Route path="/teachers" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={TeacherList} />} />
             <Route path="/teachers/:teacherId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={TeacherProfile} />} />
             <Route path="/courses" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={CoursePage} />} />
+            <Route path="/course/:courseId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={CourseDetailsPage} />} /> {/* Add route for CourseDetailsPage */}
             <Route path="/posts/:postId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={PostPage} />} />
             <Route path="/posts" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={HomePage} />} />
             <Route path="*" element={<Navigate to="/home" />} />

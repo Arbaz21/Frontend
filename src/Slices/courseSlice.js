@@ -2,30 +2,44 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async action for fetching courses
-export const fetchCourses = createAsyncThunk('course/fetchCourses', async () => {
+// Async action to fetch all courses with pagination and search
+export const fetchCourses = createAsyncThunk('course/fetchCourses', async ({ page, limit, search }) => {
   const response = await axios.get('http://localhost:3001/api/courses/getallcourses', {
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+    params: { page, limit, search }
   });
-  return response.data.courses;
+
+  return { 
+    courses: response.data.courses, 
+    totalCourses: response.data.totalCourses, 
+    totalPages: response.data.totalPages 
+  };
 });
 
-// Async action for adding a new course
-export const addCourse = createAsyncThunk('course/addCourse', async (courseData) => {
-  const response = await axios.post('http://localhost:3001/api/courses', courseData, {
+// Async action to fetch a single course's details
+export const fetchCourseDetails = createAsyncThunk('course/fetchCourseDetails', async (courseId) => {
+  const response = await axios.get(`http://localhost:3001/api/courses/getcourse/${courseId}`, {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
   });
-  return response.data.course;
+  return response.data;
 });
 
 const courseSlice = createSlice({
   name: 'course',
   initialState: {
     courses: [],
+    courseDetails: null,
     loading: false,
     error: null,
+    totalPages: 1,
+    currentPage: 1,
+    limit: 9, // Default number of courses per page
   },
-  reducers: {},
+  reducers: {
+    setPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchCourses.pending, (state) => {
@@ -34,25 +48,29 @@ const courseSlice = createSlice({
       })
       .addCase(fetchCourses.fulfilled, (state, action) => {
         state.loading = false;
-        state.courses = action.payload;
+        state.courses = action.payload.courses;
+        state.totalPages = action.payload.totalPages;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
-      .addCase(addCourse.pending, (state) => {
+      .addCase(fetchCourseDetails.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.courseDetails = null;
       })
-      .addCase(addCourse.fulfilled, (state, action) => {
+      .addCase(fetchCourseDetails.fulfilled, (state, action) => {
         state.loading = false;
-        state.courses.push(action.payload);
+        state.courseDetails = action.payload;
       })
-      .addCase(addCourse.rejected, (state, action) => {
+      .addCase(fetchCourseDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       });
   },
 });
+
+export const { setPage } = courseSlice.actions;
 
 export default courseSlice.reducer;
