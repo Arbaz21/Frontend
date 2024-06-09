@@ -4,7 +4,7 @@ import { TextField, Button, Container, Paper, Typography, Alert, Box, Grid, Form
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../Slices/authSlice';
+import { loginUser } from '../slices/authSlice';
 
 const validationSchema = Yup.object({
     email: Yup.string().email('Invalid email format').required('Required'),

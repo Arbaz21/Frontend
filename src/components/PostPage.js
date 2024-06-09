@@ -26,7 +26,7 @@ const PostPage = () => {
     const [loading, setLoading] = useState(true);
     const [commentText, setCommentText] = useState('');
     const [anonymous, setAnonymous] = useState(false);
-    const { postId } = useParams();
+    const { postId } = useParams;
     const user = JSON.parse(localStorage.getItem('user')); // Retrieve user from localStorage
 
     useEffect(() => {
