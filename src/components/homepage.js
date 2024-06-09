@@ -116,13 +116,7 @@ const HomePage = () => {
   };
 
   return (
-    <Box sx={{
-      marginTop: '20px',
-      backgroundImage: 'url("background.jpeg")',
-      backgroundSize: 'cover',
-      minHeight: '100vh',
-      padding: '20px'
-    }}>
+    <Box sx={{ marginTop: '20px', backgroundImage: 'url("background.jpeg")', backgroundSize: 'cover', minHeight: '100vh', padding: '20px' }}>
       <Container maxWidth="lg">
         <Grid container spacing={3}>
           {/* Feed Section */}
@@ -183,7 +177,7 @@ const HomePage = () => {
                   <Typography
                     variant="h5"
                     gutterBottom
-                    onClick={() => navigate(`/post/${post._id}`)}
+                    onClick={() => navigate(`/posts/${post._id}`)} // Correct path
                     sx={{ cursor: 'pointer' }}
                   >
                     <strong>{post.title}</strong>
@@ -231,7 +225,5 @@ const HomePage = () => {
         </Grid>
       </Container>
     </Box>
-  );
-};
-
+  );};
 export default HomePage;

@@ -31,29 +31,29 @@ const App = () => {
 
   return (
     <Router>
-  <Box sx={{ display: 'flex' }}>
-    <CssBaseline />
-    {isAuthenticated && <Sidebar />}
-    <Box
-      component="main"
-      sx={{ flexGrow: 1, p: 3, ml: isAuthenticated ? `${drawerWidth}px` : '0' }}
-    >
-      <Toolbar />
-      <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <RegisterPage />} />
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <LoginPage />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/profile" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={Profile} />} />
-        <Route path="/teachers" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={TeacherList} />} />
-        <Route path="/teachers/:teacherId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={TeacherProfile} />} />
-        <Route path="/courses" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={CoursePage} />} />
-        <Route path="/posts" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={PostPage} />} />
-        <Route path="*" element={<Navigate to="/home" />} />
-      </Routes>
-    </Box>
-  </Box>
-</Router>
-
+      <Box sx={{ display: 'flex' }}>
+        <CssBaseline />
+        {isAuthenticated && <Sidebar />}
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, p: 3, ml: isAuthenticated ? `${drawerWidth}px` : '0' }}
+        >
+          <Toolbar />
+          <Routes>
+            <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <RegisterPage />} />
+            <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <LoginPage />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/profile" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={Profile} />} />
+            <Route path="/teachers" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={TeacherList} />} />
+            <Route path="/teachers/:teacherId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={TeacherProfile} />} />
+            <Route path="/courses" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={CoursePage} />} />
+            <Route path="/posts/:postId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={PostPage} />} />
+            <Route path="/posts" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={HomePage} />} />
+            <Route path="*" element={<Navigate to="/home" />} />
+          </Routes>
+        </Box>
+      </Box>
+    </Router>
   );
 };
 

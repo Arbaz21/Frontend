@@ -16,10 +16,21 @@ import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
 import LogoutIcon from '@mui/icons-material/Logout';
+import Button from '@mui/material/Button';
+import { useDispatch } from 'react-redux';
+import { logout } from '../slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 200;
 
 const Sidebar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -65,11 +76,11 @@ const Sidebar = () => {
         </List>
         <Divider />
         <List>
-          <ListItem button>
-            <ListItemButton>
-              <ListItemIcon><LogoutIcon /></ListItemIcon>
-              <ListItemText primary="Logout" />
-            </ListItemButton>
+         {/* Logout Button */}
+          <ListItem>
+            <Button variant="contained" color="error" onClick={handleLogout}>
+              Logout
+            </Button>
           </ListItem>
         </List>
       </Drawer>
