@@ -1,0 +1,22 @@
+/* src/assets/styles/App.css */
+body, html, #root {
+    height: 100%;
+    margin: 0;
+  }
+  
+  .App {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  main {
+    flex-grow: 1;
+    padding: 20px;
+    transition: margin-left 0.3s;
+  }
+  
+  .MuiDrawer-paper {
+    background-color: #333;
+    color: white;
+  }
+  

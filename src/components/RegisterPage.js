@@ -18,7 +18,7 @@ const SignupSchema = Yup.object().shape({
   role: Yup.string().oneOf(['Admin', 'User'], 'Invalid role').required('Required'),
 });
 
-const Auth = () => {
+const RegisterPage = () => {
   const navigate = useNavigate();
 
   return (
@@ -155,4 +155,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default RegisterPage;

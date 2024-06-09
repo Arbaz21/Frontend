@@ -1,8 +1,15 @@
-// src/Slices/postSlice.js
+// src/slices/postSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async action for fetching posts
+// Define initial state
+const initialState = {
+  posts: [],
+  loading: false,
+  error: null,
+};
+
+// Async actions
 export const fetchPosts = createAsyncThunk('post/fetchPosts', async () => {
   const response = await axios.get('http://localhost:3001/api/posts/getposts', {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
@@ -10,44 +17,38 @@ export const fetchPosts = createAsyncThunk('post/fetchPosts', async () => {
   return response.data;
 });
 
-// Async action for adding a new post
 export const addPost = createAsyncThunk('post/addPost', async (postData) => {
   const response = await axios.post('http://localhost:3001/api/posts/createpost', postData, {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
   });
-  return response.data.post; // Return the full post object
+  return response.data.post;
 });
 
-// Async action for upvoting a post
 export const upvotePost = createAsyncThunk('post/upvotePost', async (postId) => {
-  const response = await axios.post(`http://localhost:3001/api/posts/upvotepost`, { postId }, {
+  await axios.post(`http://localhost:3001/api/posts/upvotepost`, { postId }, {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
   });
-  return { postId, type: 'upvote' }; // Return postId and vote type
+  return { postId, type: 'upvote' };
 });
 
-// Async action for downvoting a post
 export const downvotePost = createAsyncThunk('post/downvotePost', async (postId) => {
-  const response = await axios.post(`http://localhost:3001/api/posts/downvotepost`, { postId }, {
+  await axios.post(`http://localhost:3001/api/posts/downvotepost`, { postId }, {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
   });
-  return { postId, type: 'downvote' }; // Return postId and vote type
+  return { postId, type: 'downvote' };
 });
 
+// Create slice
 const postSlice = createSlice({
   name: 'post',
-  initialState: {
-    posts: [], // Initialize posts as an empty array
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {
     updatePosts: (state, action) => {
       state.posts = action.payload;
     },
     addPostToState: (state, action) => {
-      state.posts.unshift(action.payload); // Add new post to the beginning
-    }
+      state.posts.unshift(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -57,7 +58,7 @@ const postSlice = createSlice({
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
         state.loading = false;
-        state.posts = action.payload || []; // Ensure payload is an array
+        state.posts = action.payload || [];
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.loading = false;
@@ -72,9 +73,9 @@ const postSlice = createSlice({
         const newPost = action.payload;
         if (newPost && newPost.title && newPost.content) {
           if (newPost.anonymous) {
-            newPost.createdBy = 'Anonymous'; // Set createdBy to 'Anonymous' immediately
+            newPost.createdBy = 'Anonymous';
           }
-          state.posts.unshift(newPost); // Add new post to the beginning
+          state.posts.unshift(newPost);
         }
       })
       .addCase(addPost.rejected, (state, action) => {
@@ -83,16 +84,14 @@ const postSlice = createSlice({
       })
       .addCase(upvotePost.fulfilled, (state, action) => {
         const { postId } = action.payload;
-        // Find the post and update its upvotes
-        const post = state.posts.find(post => post._id === postId);
+        const post = state.posts.find((post) => post._id === postId);
         if (post) {
           post.upvotes += 1;
         }
       })
       .addCase(downvotePost.fulfilled, (state, action) => {
         const { postId } = action.payload;
-        // Find the post and update its downvotes
-        const post = state.posts.find(post => post._id === postId);
+        const post = state.posts.find((post) => post._id === postId);
         if (post) {
           post.downvotes += 1;
         }

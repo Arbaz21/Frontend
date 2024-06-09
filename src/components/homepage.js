@@ -1,4 +1,4 @@
-// src/components/HomePage.js
+// src/components/homepage/HomePage.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -30,13 +30,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { fetchPosts, addPost, upvotePost, downvotePost } from '../Slices/postSlice';
-import { fetchUser } from '../Slices/authSlice';
+import { fetchPosts, addPost, upvotePost, downvotePost } from '../slices/postSlice';
+import { fetchUser } from '../slices/authSlice';
 
 const HomePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const posts = useSelector((state) => state.post.posts);
+  const posts = useSelector((state) => state.post.posts); 
   const loading = useSelector((state) => state.post.loading);
   const error = useSelector((state) => state.post.error);
   const user = useSelector((state) => state.auth.user);
@@ -66,14 +66,13 @@ const HomePage = () => {
         };
         const newPost = await dispatch(addPost(postPayload)).unwrap();
 
-        // Update local state immediately for anonymous posts
         if (newPost.anonymous) {
           newPost.createdBy = 'Anonymous';
         }
 
         dispatch({ type: 'post/addPostToState', payload: newPost });
         resetForm();
-        setAnonymous(false); // Reset anonymous flag
+        setAnonymous(false);
       } catch (error) {
         console.error("Error creating post", error);
       }
@@ -113,41 +112,15 @@ const HomePage = () => {
     if (typeof createdBy === 'object' && createdBy !== null) {
       return `${createdBy.firstname} ${createdBy.lastname}`;
     }
-    return createdBy; // If it's not an object, return as is (could be 'Anonymous')
+    return createdBy;
   };
 
   return (
-    <Box sx={{
-      marginTop: '20px',
-      backgroundImage: 'url("background.jpeg")',
-      backgroundSize: 'cover',
-      minHeight: '100vh',
-      padding: '20px'
-    }}>
+    <Box sx={{ marginTop: '20px', backgroundImage: 'url("background.jpeg")', backgroundSize: 'cover', minHeight: '100vh', padding: '20px' }}>
       <Container maxWidth="lg">
         <Grid container spacing={3}>
-          {/* Sidebar */}
-          <Grid item xs={12} md={3}>
-            <Paper elevation={3} sx={{ padding: '20px', textAlign: 'center' }}>
-              <IconButton>
-                <MenuIcon />
-              </IconButton>
-              <Typography variant="h6" gutterBottom>
-                Sidebar
-              </Typography>
-              <Divider sx={{ marginBottom: '20px' }} />
-              {/* Link to Teachers page */}
-              <Button component={Link} to="/teachers" variant="contained" color="error" fullWidth sx={{ marginBottom: '10px' }}>Teachers</Button>
-              {/* Link to Profile page */}
-              <Button component={Link} to="/profile" variant="contained" color="error" fullWidth sx={{ marginBottom: '10px' }}>View Profile</Button>
-              {/* Link to Courses page */}
-              <Button component={Link} to="/courses" variant="contained" color="error" fullWidth sx={{ marginBottom: '10px' }}>Courses</Button>
-              <Button variant="contained" color="secondary" fullWidth>Logout</Button>
-            </Paper>
-          </Grid>
           {/* Feed Section */}
           <Grid item xs={12} md={9}>
-            {/* Post Form */}
             <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
               <Typography variant="h5" gutterBottom>
                 What's on your mind?
@@ -196,7 +169,6 @@ const HomePage = () => {
                 </Button>
               </form>
             </Paper>
-            {/* Display Posts */}
             {loading && <CircularProgress />}
             {error && <Alert severity="error">{error}</Alert>}
             {!loading && !error && posts.map(post => (
@@ -205,7 +177,7 @@ const HomePage = () => {
                   <Typography
                     variant="h5"
                     gutterBottom
-                    onClick={() => navigate(`/post/${post._id}`)}
+                    onClick={() => navigate(`/posts/${post._id}`)} // Correct path
                     sx={{ cursor: 'pointer' }}
                   >
                     <strong>{post.title}</strong>
@@ -253,7 +225,5 @@ const HomePage = () => {
         </Grid>
       </Container>
     </Box>
-  );
-};
-
+  );};
 export default HomePage;

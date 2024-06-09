@@ -1,3 +1,4 @@
+// src/components/PostPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -26,7 +27,7 @@ const PostPage = () => {
     const [loading, setLoading] = useState(true);
     const [commentText, setCommentText] = useState('');
     const [anonymous, setAnonymous] = useState(false);
-    const { postId } = useParams();
+    const { postId } = useParams(); // Correctly destructure postId
     const user = JSON.parse(localStorage.getItem('user')); // Retrieve user from localStorage
 
     useEffect(() => {
@@ -146,7 +147,7 @@ const PostPage = () => {
                                                 Posted by {post.createdBy} • {formatDate(post.createdAt)}
                                             </Typography>
                                             <Typography variant="caption" display="block" gutterBottom>
-                                                {post.upvotes} upvotes • {post.downvotes} downvotes
+                                                {post.upvotes} upvotes • {post.downvotes}
                                             </Typography>
                                         </>
                                     }
