@@ -3,11 +3,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 // Async action to handle user login
-export const loginUser = createAsyncThunk('auth/loginUser', async ({ loginUsername, password }, { rejectWithValue }) => {
+export const loginUser = createAsyncThunk('auth/loginUser', async ({ loginUsername, password, role }, { rejectWithValue }) => {
   try {
     const response = await axios.post('http://localhost:3001/api/users/login', {
       loginUsername,
-      password
+      password,
+      role  // Include role in the request body
     });
     return response.data; // Contains token and user details
   } catch (err) {

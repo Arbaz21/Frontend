@@ -12,7 +12,7 @@ const store = configureStore({
     course: courseReducer,
     post: postReducer, // Should match the key you use in useSelector
     profile: profileReducer,
-    teachers: teacherReducer,
+    teacher: teacherReducer,
   },
 });
 

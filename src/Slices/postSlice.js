@@ -1,4 +1,5 @@
 // src/slices/postSlice.js
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -42,14 +43,7 @@ export const downvotePost = createAsyncThunk('post/downvotePost', async (postId)
 const postSlice = createSlice({
   name: 'post',
   initialState,
-  reducers: {
-    updatePosts: (state, action) => {
-      state.posts = action.payload;
-    },
-    addPostToState: (state, action) => {
-      state.posts.unshift(action.payload);
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchPosts.pending, (state) => {
@@ -72,9 +66,7 @@ const postSlice = createSlice({
         state.loading = false;
         const newPost = action.payload;
         if (newPost && newPost.title && newPost.content) {
-          if (newPost.anonymous) {
-            newPost.createdBy = 'Anonymous';
-          }
+          // Insert new post at the beginning
           state.posts.unshift(newPost);
         }
       })
@@ -99,5 +91,4 @@ const postSlice = createSlice({
   },
 });
 
-export const { updatePosts, addPostToState } = postSlice.actions;
 export default postSlice.reducer;
