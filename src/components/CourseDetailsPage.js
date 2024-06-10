@@ -3,8 +3,11 @@ import { useParams } from 'react-router-dom';
 import { Container, Typography, CircularProgress, Grid, Paper, Avatar, Button } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCourseDetails } from '../slices/courseSlice';
+import { useNavigate } from 'react-router-dom';
 
 const CourseDetailsPage = () => {
+  const navigate = useNavigate();
+
   const { courseId } = useParams();
   const dispatch = useDispatch();
   const { courseDetails, loading } = useSelector(state => state.course);
@@ -76,8 +79,8 @@ const CourseDetailsPage = () => {
                     },
                     color: '#FFFFFF',
                   }}
-                  onClick={() => window.location.href = `/teachers/${teacher._id}`}
-                >
+                  onClick={() => navigate(`/teachers/${teacher._id}`)}
+                  >
                   View Profile
                 </Button>
               </div>

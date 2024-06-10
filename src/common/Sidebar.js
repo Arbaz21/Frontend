@@ -5,6 +5,8 @@ import { Home as HomeIcon, Person as PersonIcon, School as SchoolIcon, Logout as
 import { useDispatch } from 'react-redux';
 import { logout } from '../slices/authSlice';
 import { useNavigate } from 'react-router-dom';
+import IbaLogo from '../assets/IBA.png'; // Adjust the path as necessary
+
 
 const drawerWidth = 240;
 
@@ -34,41 +36,41 @@ const Sidebar = () => {
         variant="permanent"
         anchor="left"
       >
-        <Toolbar />
         <Box sx={{ padding: '10px' }}>
-          <Typography variant="h6" sx={{ textAlign: 'center', fontFamily: 'Playfair Display, serif' }}>
-            University App
+        <img src={IbaLogo} alt="University Logo" style={{ width: '100%', marginBottom: '10px' }} /> {/* Logo */}
+        <Typography variant="h6" sx={{ textAlign: 'center', fontFamily: 'Playfair Display, serif' }}>
+            AcademiQ
           </Typography>
         </Box>
         <Divider sx={{ backgroundColor: '#FFD700' }} /> {/* Gold color divider */}
         <List>
           <ListItem component={Link} to="/home" disablePadding>
-            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } }}> {/* Darker Blue on hover */}
-              <ListItemIcon sx={{ color: '#FFD700' }}> {/* Gold color icons */}
+            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' },color:'#FFFFFF' }}> {/* Darker Blue on hover */}
+              <ListItemIcon sx={{ color: '#FFFFFF' }}> {/* Gold color icons */}
                 <HomeIcon />
               </ListItemIcon>
               <ListItemText primary="Home" />
             </ListItemButton>
           </ListItem>
           <ListItem component={Link} to="/profile" disablePadding>
-            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } }}>
-              <ListItemIcon sx={{ color: '#FFD700' }}>
+            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' },color:'#FFFFFF' }}>
+              <ListItemIcon sx={{ color: '#FFFFFF' }}>
                 <PersonIcon />
               </ListItemIcon>
               <ListItemText primary="Profile" />
             </ListItemButton>
           </ListItem>
           <ListItem component={Link} to="/courses" disablePadding>
-            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } }}>
-              <ListItemIcon sx={{ color: '#FFD700' }}>
+            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' },color:'#FFFFFF' }}>
+              <ListItemIcon sx={{ color: '#FFFFFF' }}>
                 <SchoolIcon />
               </ListItemIcon>
               <ListItemText primary="Courses" />
             </ListItemButton>
           </ListItem>
           <ListItem component={Link} to="/teachers" disablePadding>
-            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } }}>
-              <ListItemIcon sx={{ color: '#FFD700' }}>
+            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } ,color:'#FFFFFF'}}>
+              <ListItemIcon sx={{ color: '#FFFFFF' }}>
                 <PersonIcon />
               </ListItemIcon>
               <ListItemText primary="Teachers" />

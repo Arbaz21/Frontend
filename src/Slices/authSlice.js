@@ -16,6 +16,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ loginUserna
   }
 });
 
+
 // Async action to fetch the user data from the server
 export const fetchUser = createAsyncThunk('auth/fetchUser', async () => {
   const response = await axios.get('http://localhost:3001/api/users/getuserprofile', {
