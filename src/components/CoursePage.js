@@ -40,6 +40,65 @@ const CoursePage = () => {
     }
   };
 
+  // Helper function to generate pagination buttons
+  const renderPagination = () => {
+    const pageNumbers = [];
+
+    // Always show the first two pages
+    for (let i = 1; i <= 2; i++) {
+      if (i <= totalPages) {
+        pageNumbers.push(i);
+      }
+    }
+
+    // Show pages around the current page
+    if (currentPage > 3) {
+      if (currentPage > 4) {
+        pageNumbers.push('...');
+      }
+      for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+        if (i > 2 && i < totalPages - 1) {
+          pageNumbers.push(i);
+        }
+      }
+      if (currentPage < totalPages - 3) {
+        pageNumbers.push('...');
+      }
+    }
+
+    // Always show the last two pages
+    for (let i = totalPages - 1; i <= totalPages; i++) {
+      if (i > 2) {
+        pageNumbers.push(i);
+      }
+    }
+
+    return pageNumbers.map((page, index) =>
+      page === '...' ? (
+        <Typography key={index} variant="button" sx={{ margin: '0 5px' }}>
+          {page}
+        </Typography>
+      ) : (
+        <Button
+          key={page}
+          variant={page === currentPage ? 'contained' : 'outlined'}
+          onClick={() => handlePageChange(page)}
+          sx={{
+            margin: '0 5px',
+            backgroundColor: page === currentPage ? '#003366' : 'transparent',
+            color: page === currentPage ? '#FFFFFF' : '#003366',
+            borderColor: '#003366',
+            '&:hover': {
+              backgroundColor: page === currentPage ? '#002244' : 'rgba(0, 51, 102, 0.1)',
+            },
+          }}
+        >
+          {page}
+        </Button>
+      )
+    );
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -135,24 +194,7 @@ const CoursePage = () => {
         >
           Previous
         </Button>
-        {[...Array(totalPages)].map((_, index) => (
-          <Button
-            key={index + 1}
-            variant={index + 1 === currentPage ? 'contained' : 'outlined'}
-            onClick={() => handlePageChange(index + 1)}
-            sx={{
-              margin: '0 5px',
-              backgroundColor: index + 1 === currentPage ? '#003366' : 'transparent',
-              color: index + 1 === currentPage ? '#FFFFFF' : '#003366',
-              borderColor: '#003366',
-              '&:hover': {
-                backgroundColor: index + 1 === currentPage ? '#002244' : 'rgba(0, 51, 102, 0.1)',
-              },
-            }}
-          >
-            {index + 1}
-          </Button>
-        ))}
+        {renderPagination()}
         <Button
           variant="contained"
           onClick={() => handlePageChange(currentPage + 1)}

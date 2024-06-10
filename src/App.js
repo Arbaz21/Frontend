@@ -41,7 +41,6 @@ const App = () => {
             padding: 0,
           }}
         >
-          {/* Remove the <Toolbar /> if not needed */}
           <Routes>
             <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <RegisterPage />} />
             <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <LoginPage />} />

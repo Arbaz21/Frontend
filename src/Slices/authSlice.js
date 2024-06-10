@@ -8,7 +8,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ loginUserna
     const response = await axios.post('http://localhost:3001/api/users/login', {
       loginUsername,
       password,
-      role  // Include role in the request body
+      role  
     });
     return response.data; // Contains token and user details
   } catch (err) {
@@ -38,6 +38,8 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       localStorage.removeItem('token'); // Remove token from localStorage on logout
+      localStorage.removeItem('user');
+
     },
   },
   extraReducers: (builder) => {
@@ -51,6 +53,8 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.user = action.payload.user;
         localStorage.setItem('token', action.payload.token); // Store token in localStorage
+localStorage.setItem('user', JSON.stringify(action.payload.user));
+
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;

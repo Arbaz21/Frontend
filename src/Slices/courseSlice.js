@@ -1,10 +1,14 @@
 // src/Slices/courseSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import API_BASE_URL from '../common/constanturl'
 
 // Async action to fetch all courses with pagination and search
 export const fetchCourses = createAsyncThunk('course/fetchCourses', async ({ page, limit, search }) => {
-  const response = await axios.get('http://localhost:3001/api/courses/getallcourses', {
+  console.log(`${API_BASE_URL}/api/courses/getallcourses`)
+  const response = await axios.get(`${API_BASE_URL}/courses/getallcourses`, {
+       
+
     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
     params: { page, limit, search }
   });

@@ -108,7 +108,6 @@ const HomePage = () => {
 
   return (
     <Box sx={{
-      marginTop: '20px',
       backgroundImage: 'url("background.jpeg")',
       backgroundSize: 'cover',
       minHeight: '100vh',

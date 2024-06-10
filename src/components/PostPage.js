@@ -199,7 +199,7 @@ const PostPage = () => {
                   secondary={
                     <>
                       <Typography variant="caption" display="block" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif' }}>
-                        Comment by {comment.anonymous ? 'Anonymous' : comment.name} • {new Date(comment.createdAt).toLocaleString()}
+                        Comment by {comment.anonymous ? 'Anonymous' : comment.name} • {new Date(comment.createdat).toLocaleString()}
                       </Typography>
                     </>
                   }
