@@ -1,181 +1,211 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-    Box,
-    Container,
-    Paper,
-    Typography,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemSecondaryAction,
-    IconButton,
-    Divider,
-    Avatar,
-    TextField,
-    Button
+  Container, Grid, Card, CardContent, Typography, CircularProgress, Button, Box, TextField, InputAdornment
 } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import SearchIcon from '@mui/icons-material/Search';
+import debounce from 'lodash.debounce';
+import { fetchCourses, setPage } from '../slices/courseSlice';
 
-const CoursesPage = () => {
-    const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [newCourseData, setNewCourseData] = useState({
-        title: '',
-        description: '',
-        teachers: []
-    });
-    const [teachersForNewCourse, setTeachersForNewCourse] = useState([]);
-    const [selectedTeachers, setSelectedTeachers] = useState([]);
+const CoursePage = () => {
+  const dispatch = useDispatch();
+  const { courses = [], loading, totalPages, currentPage, limit } = useSelector(state => state.course);
+  const [searchInput, setSearchInput] = useState(''); // For instant UI updates
+  const [searchTerm, setSearchTerm] = useState(''); // For debounced API call
 
-    useEffect(() => {
-        fetchAllCourses();
-    }, []);
+  useEffect(() => {
+    dispatch(fetchCourses({ page: currentPage, limit, search: searchTerm }));
+  }, [dispatch, currentPage, limit, searchTerm]);
 
-    const fetchAllCourses = async () => {
-        try {
-            const response = await axios.get('http://localhost:3001/api/courses/getallcourses');
-            setCourses(response.data);
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching courses", error);
-            setLoading(false);
-        }
-    };
+  // Handle search input changes
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchInput(value);
+    setDebouncedSearchTerm(value);
+    dispatch(setPage(1)); // Reset to first page on new search
+  };
 
-    const fetchTeachersForNewCourse = async () => {
-        try {
-            const response = await axios.post('http://localhost:3001/api/courses/getallteachers');
-            setTeachersForNewCourse(response.data);
-        } catch (error) {
-            console.error("Error fetching teachers for new course", error);
-        }
-    };
+  // Debounced function to update the search term state
+  const setDebouncedSearchTerm = useCallback(
+    debounce((value) => {
+      setSearchTerm(value);
+    }, 500),
+    []
+  );
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewCourseData(prevData => ({
-            ...prevData,
-            [name]: value
-        }));
-    };
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      dispatch(setPage(newPage));
+    }
+  };
 
-    const handleTeacherChange = (e) => {
-        const selectedTeacherIds = Array.from(e.target.selectedOptions, option => option.value);
-        setSelectedTeachers(selectedTeacherIds);
-    };
+  // Helper function to generate pagination buttons
+  const renderPagination = () => {
+    const pageNumbers = [];
 
-    const handleCreateCourse = async () => {
-        try {
-            const response = await axios.post('http://localhost:3001/api/courses/', {
-                title: newCourseData.title,
-                description: newCourseData.description,
-                teachers: selectedTeachers
-            });
-            setCourses(prevCourses => [...prevCourses, response.data.course]);
-            setNewCourseData({
-                title: '',
-                description: '',
-                teachers: []
-            });
-            setSelectedTeachers([]);
-        } catch (error) {
-            console.error("Error creating course", error);
-        }
-    };
-
-    if (loading) {
-        return <Typography>Loading...</Typography>;
+    // Always show the first two pages
+    for (let i = 1; i <= 2; i++) {
+      if (i <= totalPages) {
+        pageNumbers.push(i);
+      }
     }
 
-    return (
-        <Box sx={{
-            marginTop: '20px',
-            padding: '20px'
-        }}>
-            <Container maxWidth="lg">
-                <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-                    <Typography variant="h5" gutterBottom>
-                        Create a New Course
-                    </Typography>
-                    <form onSubmit={(e) => {
-                        e.preventDefault();
-                        handleCreateCourse();
-                    }}>
-                        <TextField
-                            name="title"
-                            label="Title"
-                            variant="outlined"
-                            fullWidth
-                            value={newCourseData.title}
-                            onChange={handleInputChange}
-                            margin="normal"
-                            sx={{ marginBottom: '20px' }}
-                        />
-                        <TextField
-                            name="description"
-                            label="Description"
-                            variant="outlined"
-                            fullWidth
-                            value={newCourseData.description}
-                            onChange={handleInputChange}
-                            margin="normal"
-                            sx={{ marginBottom: '20px' }}
-                        />
-                        <TextField
-                            select
-                            name="teachers"
-                            label="Teachers"
-                            variant="outlined"
-                            fullWidth
-                            value={selectedTeachers}
-                            onChange={handleTeacherChange}
-                            SelectProps={{
-                                multiple: true,
-                            }}
-                            margin="normal"
-                            sx={{ marginBottom: '20px' }}
-                        >
-                            {teachersForNewCourse.map((teacher) => (
-                                <option key={teacher._id} value={teacher._id}>
-                                    {teacher.name}
-                                </option>
-                            ))}
-                        </TextField>
-                        <Button type="submit" variant="contained" color="primary">
-                            Create Course
-                        </Button>
-                    </form>
-                </Paper>
-                <Typography variant="h5" gutterBottom>
-                    All Courses
-                </Typography>
-                <List>
-                    {courses.map(course => (
-                        <Paper key={course._id} elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-                            <ListItem alignItems="flex-start">
-                                <ListItemText
-                                    primary={course.title}
-                                    secondary={
-                                        <>
-                                            <Typography variant="body2" color="textPrimary">
-                                                {course.description}
-                                            </Typography>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Teachers:
-                                                {course.teachers.map((teacher, index) => (
-                                                    <span key={index}>{teacher}, </span>
-                                                ))}
-                                            </Typography>
-                                        </>
-                                    }
-                                />
-                            </ListItem>
-                        </Paper>
-                    ))}
-                </List>
-            </Container>
-        </Box>
+    // Show pages around the current page
+    if (currentPage > 3) {
+      if (currentPage > 4) {
+        pageNumbers.push('...');
+      }
+      for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+        if (i > 2 && i < totalPages - 1) {
+          pageNumbers.push(i);
+        }
+      }
+      if (currentPage < totalPages - 3) {
+        pageNumbers.push('...');
+      }
+    }
+
+    // Always show the last two pages
+    for (let i = totalPages - 1; i <= totalPages; i++) {
+      if (i > 2) {
+        pageNumbers.push(i);
+      }
+    }
+
+    return pageNumbers.map((page, index) =>
+      page === '...' ? (
+        <Typography key={index} variant="button" sx={{ margin: '0 5px' }}>
+          {page}
+        </Typography>
+      ) : (
+        <Button
+          key={page}
+          variant={page === currentPage ? 'contained' : 'outlined'}
+          onClick={() => handlePageChange(page)}
+          sx={{
+            margin: '0 5px',
+            backgroundColor: page === currentPage ? '#003366' : 'transparent',
+            color: page === currentPage ? '#FFFFFF' : '#003366',
+            borderColor: '#003366',
+            '&:hover': {
+              backgroundColor: page === currentPage ? '#002244' : 'rgba(0, 51, 102, 0.1)',
+            },
+          }}
+        >
+          {page}
+        </Button>
+      )
     );
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Typography variant="h2" align="center" gutterBottom sx={{ fontFamily: 'Playfair Display, serif' }}>
+        Courses
+      </Typography>
+      
+      {/* Search Bar */}
+      <Box mb={3} display="flex" justifyContent="center">
+        <TextField
+          placeholder="Search Courses"
+          value={searchInput}
+          onChange={handleSearchChange}
+          variant="outlined"
+          sx={{
+            width: '60%',
+            borderColor: '#FFD700', // Gold color border
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: '#FFD700', // Gold color border
+              },
+              '&:hover fieldset': {
+                borderColor: '#FFD700', // Gold color on hover
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#FFD700', // Gold color on focus
+              },
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
+
+      <Grid container spacing={3}>
+        {courses.length > 0 ? (
+          courses.map(course => (
+            <Grid item xs={12} sm={6} md={4} key={course._id}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: '10px',
+                  border: '1px solid #FFD700', // Gold color border
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Subtle shadow
+                  '&:hover': {
+                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Hover effect
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="h5"
+                    component="h2"
+                    align="center"
+                    sx={{ fontFamily: 'Playfair Display, serif', color: '#003366' }} // Deep Blue color
+                  >
+                    <Link to={`/course/${course._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      {course.Course_name}
+                    </Link>
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Typography variant="h6" align="center" sx={{ width: '100%', marginTop: 2 }}>
+            No courses found.
+          </Typography>
+        )}
+      </Grid>
+
+      {/* Pagination Controls */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Button
+          variant="contained"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          sx={{ margin: '0 5px', backgroundColor: '#003366', color: '#FFFFFF', '&:hover': { backgroundColor: '#002244' } }}
+        >
+          Previous
+        </Button>
+        {renderPagination()}
+        <Button
+          variant="contained"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          sx={{ margin: '0 5px', backgroundColor: '#003366', color: '#FFFFFF', '&:hover': { backgroundColor: '#002244' } }}
+        >
+          Next
+        </Button>
+      </Box>
+    </Container>
+  );
 };
 
-export default CoursesPage;
+export default CoursePage;

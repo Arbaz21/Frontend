@@ -23,12 +23,14 @@ const teacherSlice = createSlice({
   initialState: {
     teachers: [],
     selectedTeacher: null,
+    courses: [], // Ensure this matches how you expect to use it
     loading: false,
     error: null,
   },
   reducers: {
     clearSelectedTeacher: (state) => {
       state.selectedTeacher = null;
+      state.courses = [];
     },
   },
   extraReducers: (builder) => {

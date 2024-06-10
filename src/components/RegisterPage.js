@@ -1,10 +1,16 @@
 import React from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Box, TextField, Button, Container, Typography, Paper, CircularProgress, MenuItem, Select, InputLabel, FormControl, Grid, Alert } from '@mui/material';
+import {
+  Box, TextField, Button, Container, Typography, Paper, CircularProgress,
+  MenuItem, Select, InputLabel, FormControl, Grid
+} from '@mui/material';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
+// Validation schema using Yup
 const SignupSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Required'),
   password: Yup.string()
@@ -28,7 +34,7 @@ const RegisterPage = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundImage: `url('/background.jpeg')`, // Update with your image URL
+        backgroundImage: `url('/background.jpeg')`, // Replace with a suitable background image URL
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
@@ -37,8 +43,20 @@ const RegisterPage = () => {
       <Container maxWidth="md">
         <Grid container spacing={2} justifyContent="center">
           <Grid item xs={12} md={8}>
-            <Paper elevation={10} sx={{ padding: '20px', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
-              <Typography variant="h5" gutterBottom sx={{ textAlign: 'center' }}>
+            <Paper
+              elevation={10}
+              sx={{
+                padding: '30px',
+                borderRadius: '15px',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              <Typography
+                variant="h4"
+                gutterBottom
+                sx={{ textAlign: 'center', fontFamily: 'Playfair Display, serif' }}
+              >
                 Sign Up
               </Typography>
               <Formik
@@ -47,21 +65,27 @@ const RegisterPage = () => {
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                   try {
                     const response = await axios.post('http://localhost:3001/api/users/register', values);
-                    alert(response.data.msg);
-                    setSubmitting(false);
-                    navigate('/login'); // Navigate to login page on successful registration
+                  
+                    // Handle success response
+                    toast.success(response.data.msg); // Display success message
+                    setSubmitting(false); // Reset form submission state
+                    navigate('/login'); // Redirect to login page upon successful registration
                   } catch (error) {
                     console.error('Error:', error.response?.data || error.message);
+                  
+                    // Extracting and displaying error message from server response
                     const apiError = error.response?.data?.msg || 'An unexpected error occurred. Please try again.';
-                    setErrors({ apiError });
-                    setSubmitting(false);
+                    setErrors({ apiError }); // Set API error to form errors for display
+                    toast.error(apiError); // Display error message to the user
+                    setSubmitting(false); // Reset form submission state
                   }
+                  
                 }}
               >
                 {({ isSubmitting, errors, touched, handleChange, values }) => (
-                  <Form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <Form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     {errors.apiError && (
-                      <Alert severity="error">{errors.apiError}</Alert>
+                      <Typography color="error">{errors.apiError}</Typography>
                     )}
                     <TextField
                       name="firstname"
@@ -137,6 +161,15 @@ const RegisterPage = () => {
                       variant="contained"
                       color="primary"
                       fullWidth
+                      sx={{
+                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        backgroundColor: '#003366', // Deep Blue
+                        '&:hover': {
+                          backgroundColor: '#002244', // Darker Blue
+                        }
+                      }}
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? <CircularProgress size={24} /> : 'Sign Up'}
@@ -145,11 +178,12 @@ const RegisterPage = () => {
                 )}
               </Formik>
               <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '16px' }}>
-                Already Signed Up? <a href="/login">Login</a>
+                Already Signed Up? <a href="/login" style={{ color: '#FFD700' }}>Login</a> {/* Gold color for link */}
               </Typography>
             </Paper>
           </Grid>
         </Grid>
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
       </Container>
     </Box>
   );

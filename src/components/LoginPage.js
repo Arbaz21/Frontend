@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { TextField, Button, Container, Paper, Typography, Alert, Box, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import {
+    TextField, Button, Container, Paper, Typography, Box, Grid,
+    FormControl, InputLabel, Select, MenuItem, Modal, Backdrop, Fade
+} from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../slices/authSlice';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const validationSchema = Yup.object({
     email: Yup.string().email('Invalid email format').required('Required'),
@@ -13,14 +18,20 @@ const validationSchema = Yup.object({
 
 const LoginPage = () => {
     const [error, setError] = useState(null);
-    const [role, setRole] = useState('User'); // Add state for role selection
+    const [role, setRole] = useState('User'); // Default role is User
+    const [openModal, setOpenModal] = useState(false); // State to control modal visibility
     const navigate = useNavigate();
     const dispatch = useDispatch(); // Redux dispatch
+
+    const handleModalClose = () => {
+        setOpenModal(false);
+    };
 
     const formik = useFormik({
         initialValues: {
             email: '',
             password: '',
+            role: []
         },
         validationSchema: validationSchema,
         onSubmit: async (values) => {
@@ -28,24 +39,31 @@ const LoginPage = () => {
             try {
                 // Dispatch Redux action to log in the user
                 const response = await dispatch(loginUser({
-                    loginUsername: values.email, // Use email as loginUsername
+                    loginUsername: values.email,
                     password: values.password,
                     role, // Include the selected role
                 })).unwrap();
 
                 // Handle response
                 const { user } = response;
-                alert('Login successful!');
 
-                // Role-based redirection
-                if (role === 'Admin' && user.roles.includes('Admin')) {
-                    navigate('/admin'); // Redirect to admin dashboard if role is Admin
-                } else {
-                    navigate('/home'); // Redirect to user home page if role is User
-                }
+                // Role verification
+                if (role === 'Admin' && !user.roles.includes('Admin')) {
+                    throw new Error('You do not have Admin privileges.');
+                } 
+                // else if (role === 'User' && user.roles.includes('Admin')) {
+                //     throw new Error('Admins cannot log in as User.');
+                // }
+
+                // If the login is successful and the role is correct, navigate to the appropriate page
+                toast.success('Login successful!');
+                navigate(role === 'Admin' ? '/admin/dashboard' : '/home'); // Adjust the admin route as needed
+
             } catch (err) {
                 console.error('Error during login:', err);
                 setError(err.message || 'Login failed. Please try again.');
+                toast.error(err.message || 'Login failed. Please try again.');
+                setOpenModal(true); // Show modal with error message
             }
         },
     });
@@ -57,21 +75,28 @@ const LoginPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundImage: `url('/background.jpeg')`,
+                backgroundImage: `url('/background.jpeg')`, // Replace with a suitable background image URL
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
             }}
         >
             <Container maxWidth="md">
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={8}>
-                        <Paper elevation={10} sx={{ padding: '20px', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
-                            <Typography variant="h5" gutterBottom sx={{ textAlign: 'center' }}>
+                <Grid container justifyContent="center">
+                    <Grid item xs={12} sm={8} md={6}>
+                        <Paper
+                            elevation={10}
+                            sx={{
+                                padding: '30px',
+                                borderRadius: '15px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            }}
+                        >
+                            <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', fontFamily: 'Playfair Display, serif' }}>
                                 Login
                             </Typography>
-                            {error && <Alert severity="error">{error}</Alert>}
-                            <form onSubmit={formik.handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <form onSubmit={formik.handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 <TextField
                                     name="email"
                                     label="Email"
@@ -81,6 +106,7 @@ const LoginPage = () => {
                                     onBlur={formik.handleBlur}
                                     error={formik.touched.email && Boolean(formik.errors.email)}
                                     helperText={formik.touched.email && formik.errors.email}
+                                    fullWidth
                                 />
                                 <TextField
                                     name="password"
@@ -92,8 +118,9 @@ const LoginPage = () => {
                                     onBlur={formik.handleBlur}
                                     error={formik.touched.password && Boolean(formik.errors.password)}
                                     helperText={formik.touched.password && formik.errors.password}
+                                    fullWidth
                                 />
-                                {/* Add role selection dropdown */}
+                                {/* Role selection dropdown */}
                                 <FormControl variant="outlined" fullWidth>
                                     <InputLabel id="role-select-label">Role</InputLabel>
                                     <Select
@@ -106,15 +133,68 @@ const LoginPage = () => {
                                         <MenuItem value="Admin">Admin</MenuItem>
                                     </Select>
                                 </FormControl>
-                                <Button type="submit" variant="contained" color="primary">Login</Button>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{
+                                        padding: '10px 20px',
+                                        borderRadius: '8px',
+                                        fontSize: '16px',
+                                        backgroundColor: '#003366', // Deep Blue
+                                        '&:hover': {
+                                            backgroundColor: '#002244', // Darker Blue
+                                        }
+                                    }}
+                                >
+                                    Login
+                                </Button>
                             </form>
                             <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '16px' }}>
-                                New User? <a href="/">Sign Up</a>
+                                New User? <a href="/" style={{ color: '#FFD700' }}>Sign Up</a> {/* Gold color for link */}
                             </Typography>
                         </Paper>
                     </Grid>
                 </Grid>
             </Container>
+            {/* Modal for role-based error */}
+            <Modal
+                open={openModal}
+                onClose={handleModalClose}
+                closeAfterTransition
+                BackdropComponent={Backdrop}
+                BackdropProps={{
+                    timeout: 500,
+                }}
+            >
+                <Fade in={openModal}>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 400,
+                            bgcolor: 'background.paper',
+                            border: '2px solid #000',
+                            boxShadow: 24,
+                            p: 4,
+                            borderRadius: '10px',
+                        }}
+                    >
+                        <Typography variant="h6" component="h2" sx={{ fontFamily: 'Playfair Display, serif' }}>
+                            Role Error
+                        </Typography>
+                        <Typography sx={{ mt: 2 }}>
+                            {error}
+                        </Typography>
+                        <Button onClick={handleModalClose} sx={{ mt: 2 }} variant="contained" color="primary">
+                            Close
+                        </Button>
+                    </Box>
+                </Fade>
+            </Modal>
+            <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
         </Box>
     );
 }
