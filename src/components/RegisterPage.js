@@ -5,8 +5,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, TextField, Button, Container, Typography, Paper, CircularProgress,
-  MenuItem, Select, InputLabel, FormControl, Grid, Alert
+  MenuItem, Select, InputLabel, FormControl, Grid
 } from '@mui/material';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Validation schema using Yup
 const SignupSchema = Yup.object().shape({
@@ -63,21 +65,27 @@ const RegisterPage = () => {
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                   try {
                     const response = await axios.post('http://localhost:3001/api/users/register', values);
-                    alert(response.data.msg);
-                    setSubmitting(false);
-                    navigate('/login'); // Navigate to login page on successful registration
+                  
+                    // Handle success response
+                    toast.success(response.data.msg); // Display success message
+                    setSubmitting(false); // Reset form submission state
+                    navigate('/login'); // Redirect to login page upon successful registration
                   } catch (error) {
                     console.error('Error:', error.response?.data || error.message);
+                  
+                    // Extracting and displaying error message from server response
                     const apiError = error.response?.data?.msg || 'An unexpected error occurred. Please try again.';
-                    setErrors({ apiError });
-                    setSubmitting(false);
+                    setErrors({ apiError }); // Set API error to form errors for display
+                    toast.error(apiError); // Display error message to the user
+                    setSubmitting(false); // Reset form submission state
                   }
+                  
                 }}
               >
                 {({ isSubmitting, errors, touched, handleChange, values }) => (
                   <Form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     {errors.apiError && (
-                      <Alert severity="error">{errors.apiError}</Alert>
+                      <Typography color="error">{errors.apiError}</Typography>
                     )}
                     <TextField
                       name="firstname"
@@ -175,6 +183,7 @@ const RegisterPage = () => {
             </Paper>
           </Grid>
         </Grid>
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
       </Container>
     </Box>
   );

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
-    TextField, Button, Container, Paper, Typography, Alert, Box, Grid,
+    TextField, Button, Container, Paper, Typography, Box, Grid,
     FormControl, InputLabel, Select, MenuItem, Modal, Backdrop, Fade
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../slices/authSlice';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const validationSchema = Yup.object({
     email: Yup.string().email('Invalid email format').required('Required'),
@@ -48,17 +50,19 @@ const LoginPage = () => {
                 // Role verification
                 if (role === 'Admin' && !user.roles.includes('Admin')) {
                     throw new Error('You do not have Admin privileges.');
-                } else if (role === 'User' && user.roles.includes('Admin')) {
-                    throw new Error('Admins cannot log in as User.');
-                }
+                } 
+                // else if (role === 'User' && user.roles.includes('Admin')) {
+                //     throw new Error('Admins cannot log in as User.');
+                // }
 
                 // If the login is successful and the role is correct, navigate to the appropriate page
-                alert('Login successful!');
+                toast.success('Login successful!');
                 navigate(role === 'Admin' ? '/admin/dashboard' : '/home'); // Adjust the admin route as needed
 
             } catch (err) {
                 console.error('Error during login:', err);
                 setError(err.message || 'Login failed. Please try again.');
+                toast.error(err.message || 'Login failed. Please try again.');
                 setOpenModal(true); // Show modal with error message
             }
         },
@@ -92,7 +96,6 @@ const LoginPage = () => {
                             <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', fontFamily: 'Playfair Display, serif' }}>
                                 Login
                             </Typography>
-                            {error && <Alert severity="error">{error}</Alert>}
                             <form onSubmit={formik.handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 <TextField
                                     name="email"
@@ -191,6 +194,7 @@ const LoginPage = () => {
                     </Box>
                 </Fade>
             </Modal>
+            <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
         </Box>
     );
 }
