@@ -52,7 +52,7 @@ const App = () => {
             <Route path="/posts/:postId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={PostPage} />} />
             <Route path="/posts" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={HomePage} />} />
             <Route path="/unauthorized" element={<Unauthorized />} /> {/* Ensure this route points to the Unauthorized component */}
-            <Route path="*" element={<Navigate to="/home" />} />
+            {/* <Route path="*" element={<Navigate to="/home" />} /> */}
           </Routes>
         </Box>
       </Box>

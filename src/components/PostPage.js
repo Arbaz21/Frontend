@@ -1,231 +1,180 @@
 // src/components/PostPage.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchPostById, postComment, fetchComments, upvotePost, downvotePost } from '../slices/postSlice';
 import {
-    Box,
-    Container,
-    Paper,
-    Typography,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemSecondaryAction,
-    IconButton,
-    Avatar,
-    TextField,
-    Button,
-    FormControlLabel,
-    Checkbox
+  Box, Container, Paper, Typography, List, ListItem, ListItemText, ListItemSecondaryAction,
+  IconButton, Avatar, TextField, Button, FormControlLabel, Checkbox, CircularProgress
 } from '@mui/material';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const PostPage = () => {
-    const [post, setPost] = useState({ comments: [] }); // Default empty comments array
-    const [loading, setLoading] = useState(true);
-    const [commentText, setCommentText] = useState('');
-    const [anonymous, setAnonymous] = useState(false);
-    const { postId } = useParams(); // Correctly destructure postId
-    const user = JSON.parse(localStorage.getItem('user')); // Retrieve user from localStorage
+  const { postId } = useParams();
+  const dispatch = useDispatch();
+  const { post, loading, error } = useSelector(state => state.post);
+  const [commentText, setCommentText] = useState('');
+  const [anonymous, setAnonymous] = useState(false);
+  const [isCommentLoading, setIsCommentLoading] = useState(false);
+  const [isFetchingComments, setIsFetchingComments] = useState(false); // New state for fetching comments
 
-    useEffect(() => {
-        fetchPost();
-    }, []);
+  const user = JSON.parse(localStorage.getItem('user'));
 
-    // Fetch post details and comments
-    const fetchPost = async () => {
-        try {
-            const postResponse = await axios.post(
-                `http://localhost:3001/api/posts/getpostbyid`, 
-                { postId },
-                {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                }
-            );
+  useEffect(() => {
+    dispatch(fetchPostById(postId));
+    dispatch(fetchComments(postId)); // Fetch comments when the component mounts
+  }, [dispatch, postId]);
 
-            // Ensure that comments have valid dates
-            const postData = postResponse.data;
-            postData.comments = postData.comments.map(comment => ({
-                ...comment,
-                createdAt: comment.createdAt || new Date().toISOString()
-            }));
-
-            setPost(postData);
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching post", error);
-            setLoading(false);
-        }
-    };
-
-    // Handle upvote or downvote
-    const handleVote = async (type) => {
-        try {
-            await axios.post(`http://localhost:3001/api/posts/${type}post`, { postId }, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            fetchPost(); // Refresh the post details after voting
-        } catch (error) {
-            console.error(`Error handling ${type} vote`, error);
-        }
-    };
-
-    // Handle adding a new comment
-    const handleComment = async () => {
-        try {
-            const response = await axios.post(`http://localhost:3001/api/comments/postCommentOnPost`, {
-                post_id: postId,
-                commentText,
-                anonymous
-            }, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-
-            const newComment = {
-                _id: response.data.commentId,
-                comment: commentText,
-                anonymous,
-                name: anonymous ? 'Anonymous' : `${user.firstname} ${user.lastname}`,
-                createdAt: new Date().toISOString() // Set the createdAt field with the current date-time
-            };
-            
-            setPost(prevPost => ({ ...prevPost, comments: [newComment, ...prevPost.comments] }));
-            setCommentText('');
-            setAnonymous(false);
-        } catch (error) {
-            console.error(`Error commenting`, error);
-        }
-    };
-
-    // Handle deleting a comment
-    const handleDeleteComment = async (commentId) => {
-        try {
-            await axios.delete('http://localhost:3001/api/comments/deletecomment', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                data: { objectId: commentId }
-            });
-            fetchPost(); // Refresh the post details after deleting a comment
-        } catch (error) {
-            console.error("Error deleting comment", error);
-        }
-    };
-
-    // Format the date to a readable string
-    const formatDate = (dateString) => {
-        if (!dateString) return 'No Date Provided';
-        const date = new Date(dateString);
-        return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString();
-    };
-
-    // Loading state while fetching data
-    if (loading) {
-        return <Typography>Loading...</Typography>;
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    setIsCommentLoading(true);
+    try {
+      await dispatch(postComment({ postId, commentText, anonymous })).unwrap();
+      setCommentText('');
+      setAnonymous(false);
+      toast.success('Comment posted successfully');
+      
+      // Refresh comments after posting
+      await dispatch(fetchComments(postId)).unwrap();
+    } catch (err) {
+      toast.error('Failed to post comment');
+    } finally {
+      setIsCommentLoading(false);
     }
+  };
 
-    return (
-        <Box sx={{ marginTop: '20px', padding: '20px' }}>
-            <Container maxWidth="lg">
-                {/* Display Post */}
-                {post && (
-                    <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-                        <Typography variant="h5" gutterBottom>
-                            <strong>{post.title}</strong>
-                        </Typography>
-                        <List>
-                            <ListItem alignItems="flex-start">
-                                <Avatar alt={post.createdBy} src="/static/images/avatar/1.jpg" sx={{ marginRight: '10px' }} />
-                                <ListItemText
-                                    primary={post.title}
-                                    secondary={
-                                        <>
-                                            <Typography component="span" variant="body2" color="textPrimary">
-                                                {post.content}
-                                            </Typography>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Posted by {post.createdBy} • {formatDate(post.createdAt)}
-                                            </Typography>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                {post.upvotes} upvotes • {post.downvotes}
-                                            </Typography>
-                                        </>
-                                    }
-                                />
-                                <ListItemSecondaryAction>
-                                    <IconButton edge="end" aria-label="upvote" onClick={() => handleVote('upvote')}>
-                                        <ThumbUpAltIcon />
-                                    </IconButton>
-                                    <IconButton edge="end" aria-label="downvote" onClick={() => handleVote('downvote')}>
-                                        <ThumbDownAltIcon />
-                                    </IconButton>
-                                </ListItemSecondaryAction>
-                            </ListItem>
-                        </List>
-                    </Paper>
+  const handleVote = async (voteType) => {
+    try {
+      if (voteType === 'upvote') {
+        await dispatch(upvotePost(postId)).unwrap();
+      } else if (voteType === 'downvote') {
+        await dispatch(downvotePost(postId)).unwrap();
+      }
+    } catch (error) {
+      toast.error(`Failed to ${voteType} post`);
+    }
+  };
+
+  const handleDeleteComment = (commentId) => {
+    // Implement delete comment functionality here
+  };
+
+
+  if (loading) {
+    // return <Typography>Loading...</Typography>;
+  }
+
+  if (error) {
+    return <Typography>Error: {error}</Typography>;
+  }
+
+  return (
+    <Box sx={{ marginTop: '20px', padding: '20px' }}>
+      <Container maxWidth="lg">
+        <ToastContainer />
+        {post && (
+          <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
+            <Typography variant="h5" gutterBottom>
+              <strong>{post.title}</strong>
+            </Typography>
+            <List>
+              <ListItem alignItems="flex-start">
+                <Avatar alt={post.createdBy} src="/static/images/avatar/1.jpg" sx={{ marginRight: '10px' }} />
+                <ListItemText
+                  primary={post.title}
+                  secondary={
+                    <>
+                      <Typography component="span" variant="body2" color="textPrimary">
+                        {post.content}
+                      </Typography>
+                      <Typography variant="caption" display="block" gutterBottom>
+                        Posted by {post.createdBy} • {post.createdAt}
+                      </Typography>
+                      <Typography variant="caption" display="block" gutterBottom>
+                        {post.upvotes} upvotes • {post.downvotes} downvotes
+                      </Typography>
+                    </>
+                  }
+                />
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" aria-label="upvote" onClick={() => handleVote('upvote')}>
+                    <ThumbUpAltIcon />
+                  </IconButton>
+                  <IconButton edge="end" aria-label="downvote" onClick={() => handleVote('downvote')}>
+                    <ThumbDownAltIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            </List>
+          </Paper>
+        )}
+        <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
+          <Typography variant="h5" gutterBottom>
+            Add a comment
+          </Typography>
+          <form onSubmit={handleCommentSubmit}>
+            <TextField
+              name="commentText"
+              label="Add a comment"
+              variant="outlined"
+              fullWidth
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              margin="normal"
+              sx={{ marginBottom: '20px' }}
+              disabled={isCommentLoading}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={anonymous}
+                  onChange={() => setAnonymous(!anonymous)}
+                  color="error"
+                  disabled={isCommentLoading}
+                />
+              }
+              label="Post Anonymously"
+            />
+            <Button type="submit" variant="contained" color="error" disabled={isCommentLoading}>
+              {isCommentLoading ? <CircularProgress size={24} color="inherit" /> : 'Comment'}
+            </Button>
+          </form>
+        </Paper>
+        {post && post.comments && post.comments.length > 0 ? (
+          post.comments.slice().reverse().map(comment => (
+            <Paper key={comment._id} elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
+              <ListItem alignItems="flex-start">
+                <Avatar alt={comment.name} src="/static/images/avatar/1.jpg" />
+                <ListItemText
+                  primary={comment.comment}
+                  secondary={
+                    <>
+                      <Typography variant="caption" display="block" gutterBottom>
+                        Comment by {comment.anonymous ? 'Anonymous' : comment.name} • {comment.createdAt}
+                      </Typography>
+                    </>
+                  }
+                />
+                {(user && (user.role === 'Admin' || user.erp === comment.erp)) && (
+                  <ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteComment(comment._id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
                 )}
-                {/* Comment Form */}
-                <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-                    <Typography variant="h5" gutterBottom>
-                        Add a comment
-                    </Typography>
-                    <form onSubmit={(e) => {
-                        e.preventDefault();
-                        handleComment();
-                    }}>
-                        <TextField
-                            name="commentText"
-                            label="Add a comment"
-                            variant="outlined"
-                            fullWidth
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            margin="normal"
-                            sx={{ marginBottom: '20px' }}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={anonymous}
-                                    onChange={() => setAnonymous(!anonymous)}
-                                    color="error"
-                                />
-                            }
-                            label="Post Anonymously"
-                        />
-                        <Button type="submit" variant="contained" color="error">
-                            Comment
-                        </Button>
-                    </form>
-                </Paper>
-                {/* Comment Section */}
-                {post && post.comments.map(comment => (
-                    <Paper key={comment._id} elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-                        <ListItem alignItems="flex-start">
-                            <Avatar alt={comment.name} src="/static/images/avatar/1.jpg" />
-                            <ListItemText
-                                primary={comment.comment}
-                                secondary={
-                                    <>
-                                        <Typography variant="caption" display="block" gutterBottom>
-                                            Comment by {comment.anonymous ? 'Anonymous' : comment.name} • {formatDate(comment.createdAt)}
-                                        </Typography>
-                                    </>
-                                }
-                            />
-                            {(user && (user.role === 'Admin' || user.erp === comment.erp)) && (
-                                <ListItemSecondaryAction>
-                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteComment(comment._id)}>
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </ListItemSecondaryAction>
-                            )}
-                        </ListItem>
-                    </Paper>
-                ))}
-            </Container>
-        </Box>
-    );
+              </ListItem>
+            </Paper>
+          ))
+        ) : (
+          <Typography>No comments yet.</Typography>
+        )}
+      </Container>
+    </Box>
+  );
 };
 
 export default PostPage;

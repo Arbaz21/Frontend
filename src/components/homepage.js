@@ -14,6 +14,8 @@ import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchPosts, addPost, upvotePost, downvotePost } from '../slices/postSlice';
 import { fetchUser } from '../slices/authSlice';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage = () => {
   const dispatch = useDispatch();
@@ -52,12 +54,13 @@ const HomePage = () => {
 
         resetForm();
         setAnonymous(false);
-        setNotification('Post created successfully!');
-        
+        toast.success('Post created successfully!');
+
         // Fetch the latest posts after creating a new post
         dispatch(fetchPosts());
       } catch (error) {
         console.error("Error creating post", error);
+        toast.error('Failed to create post');
       }
     }
   });
@@ -69,8 +72,10 @@ const HomePage = () => {
         data: { postId }
       });
       dispatch(fetchPosts());
+      toast.success('Post deleted successfully!');
     } catch (error) {
       console.error("Error deleting post", error);
+      toast.error('Failed to delete post');
     }
   };
 
@@ -78,11 +83,14 @@ const HomePage = () => {
     try {
       if (type === 'upvote') {
         await dispatch(upvotePost(postId)).unwrap();
+        toast.success('Post upvoted');
       } else {
         await dispatch(downvotePost(postId)).unwrap();
+        toast.success('Post downvoted');
       }
     } catch (error) {
       console.error(`Error handling ${type} vote`, error);
+      toast.error(`Failed to ${type} post`);
     }
   };
 
@@ -101,6 +109,7 @@ const HomePage = () => {
   return (
     <Box sx={{ marginTop: '20px', backgroundImage: 'url("background.jpeg")', backgroundSize: 'cover', minHeight: '100vh', padding: '20px' }}>
       <Container maxWidth="lg">
+        <ToastContainer />
         <Grid container spacing={3}>
           <Grid item xs={12} md={9}>
             <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
@@ -146,12 +155,12 @@ const HomePage = () => {
                   }
                   label="Post anonymously"
                 />
-                <Button type="submit" variant="contained" color="error">
-                  Post
+                <Button type="submit" variant="contained" color="error" disabled={loading}>
+                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Post'}
                 </Button>
               </form>
             </Paper>
-            {loading && <CircularProgress />}
+            {/* {loading && <CircularProgress />} */}
             {error && <Alert severity="error">{error}</Alert>}
             {!loading && !error && posts.slice().reverse().map(post => (
               post && post.title && post.content && (
