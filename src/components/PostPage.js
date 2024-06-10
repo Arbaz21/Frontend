@@ -1,11 +1,10 @@
-// src/components/PostPage.js
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPostById, postComment, fetchComments, upvotePost, downvotePost } from '../slices/postSlice';
 import {
   Box, Container, Paper, Typography, List, ListItem, ListItemText, ListItemSecondaryAction,
-  IconButton, Avatar, TextField, Button, FormControlLabel, Checkbox, CircularProgress
+  IconButton, Avatar, TextField, Button, FormControlLabel, Checkbox, CircularProgress, Alert
 } from '@mui/material';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
@@ -20,13 +19,12 @@ const PostPage = () => {
   const [commentText, setCommentText] = useState('');
   const [anonymous, setAnonymous] = useState(false);
   const [isCommentLoading, setIsCommentLoading] = useState(false);
-  const [isFetchingComments, setIsFetchingComments] = useState(false); // New state for fetching comments
 
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     dispatch(fetchPostById(postId));
-    dispatch(fetchComments(postId)); // Fetch comments when the component mounts
+    dispatch(fetchComments(postId));
   }, [dispatch, postId]);
 
   const handleCommentSubmit = async (e) => {
@@ -37,9 +35,7 @@ const PostPage = () => {
       setCommentText('');
       setAnonymous(false);
       toast.success('Comment posted successfully');
-      
-      // Refresh comments after posting
-      await dispatch(fetchComments(postId)).unwrap();
+      dispatch(fetchComments(postId));
     } catch (err) {
       toast.error('Failed to post comment');
     } finally {
@@ -63,38 +59,59 @@ const PostPage = () => {
     // Implement delete comment functionality here
   };
 
-
   if (loading) {
-    // return <Typography>Loading...</Typography>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-    return <Typography>Error: {error}</Typography>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
   }
 
   return (
-    <Box sx={{ marginTop: '20px', padding: '20px' }}>
+    <Box sx={{
+      marginTop: '20px',
+      backgroundImage: 'url("/background.jpeg")', // Replace with your academic-themed background image
+      backgroundSize: 'cover',
+      minHeight: '100vh',
+      padding: '20px',
+      backgroundColor: 'rgba(255, 255, 255, 0.8)', // Light overlay for readability
+    }}>
       <Container maxWidth="lg">
         <ToastContainer />
         {post && (
-          <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-            <Typography variant="h5" gutterBottom>
+          <Paper elevation={3} sx={{
+            marginBottom: '20px',
+            padding: '20px',
+            borderRadius: '10px',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #FFD700', // Gold color border
+          }}>
+            <Typography variant="h5" gutterBottom sx={{ fontFamily: 'Playfair Display, serif' }}>
               <strong>{post.title}</strong>
             </Typography>
             <List>
               <ListItem alignItems="flex-start">
                 <Avatar alt={post.createdBy} src="/static/images/avatar/1.jpg" sx={{ marginRight: '10px' }} />
                 <ListItemText
-                  primary={post.title}
+                  primary={<Typography variant="body1" sx={{ fontFamily: 'Roboto, sans-serif' }}>{post.title}</Typography>}
                   secondary={
                     <>
-                      <Typography component="span" variant="body2" color="textPrimary">
+                      <Typography component="span" variant="body2" color="textPrimary" sx={{ fontFamily: 'Roboto, sans-serif' }}>
                         {post.content}
                       </Typography>
-                      <Typography variant="caption" display="block" gutterBottom>
-                        Posted by {post.createdBy} • {post.createdAt}
+                      <Typography variant="caption" display="block" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif' }}>
+                        Posted by {post.createdBy} • {new Date(post.createdAt).toLocaleString()}
                       </Typography>
-                      <Typography variant="caption" display="block" gutterBottom>
+                      <Typography variant="caption" display="block" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif' }}>
                         {post.upvotes} upvotes • {post.downvotes} downvotes
                       </Typography>
                     </>
@@ -102,18 +119,25 @@ const PostPage = () => {
                 />
                 <ListItemSecondaryAction>
                   <IconButton edge="end" aria-label="upvote" onClick={() => handleVote('upvote')}>
-                    <ThumbUpAltIcon />
+                    <ThumbUpAltIcon sx={{ color: '#003366' }} /> {/* Deep Blue icon */}
                   </IconButton>
                   <IconButton edge="end" aria-label="downvote" onClick={() => handleVote('downvote')}>
-                    <ThumbDownAltIcon />
+                    <ThumbDownAltIcon sx={{ color: '#B22222' }} /> {/* Firebrick color icon */}
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
             </List>
           </Paper>
         )}
-        <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-          <Typography variant="h5" gutterBottom>
+        <Paper elevation={3} sx={{
+          marginBottom: '20px',
+          padding: '20px',
+          borderRadius: '10px',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #FFD700', // Gold color border
+        }}>
+          <Typography variant="h5" gutterBottom sx={{ fontFamily: 'Playfair Display, serif' }}>
             Add a comment
           </Typography>
           <form onSubmit={handleCommentSubmit}>
@@ -133,28 +157,49 @@ const PostPage = () => {
                 <Checkbox
                   checked={anonymous}
                   onChange={() => setAnonymous(!anonymous)}
-                  color="error"
+                  color="primary"
                   disabled={isCommentLoading}
                 />
               }
               label="Post Anonymously"
             />
-            <Button type="submit" variant="contained" color="error" disabled={isCommentLoading}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isCommentLoading}
+              sx={{
+                padding: '10px 20px',
+                borderRadius: '8px',
+                fontSize: '16px',
+                backgroundColor: '#003366', // Deep Blue
+                '&:hover': {
+                  backgroundColor: '#002244', // Darker Blue on hover
+                }
+              }}
+            >
               {isCommentLoading ? <CircularProgress size={24} color="inherit" /> : 'Comment'}
             </Button>
           </form>
         </Paper>
         {post && post.comments && post.comments.length > 0 ? (
           post.comments.slice().reverse().map(comment => (
-            <Paper key={comment._id} elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
+            <Paper key={comment._id} elevation={3} sx={{
+              marginBottom: '20px',
+              padding: '20px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #FFD700', // Gold color border
+            }}>
               <ListItem alignItems="flex-start">
-                <Avatar alt={comment.name} src="/static/images/avatar/1.jpg" />
+                <Avatar alt={comment.name} src="/static/images/avatar/1.jpg" sx={{ marginRight: '10px' }} />
                 <ListItemText
                   primary={comment.comment}
                   secondary={
                     <>
-                      <Typography variant="caption" display="block" gutterBottom>
-                        Comment by {comment.anonymous ? 'Anonymous' : comment.name} • {comment.createdAt}
+                      <Typography variant="caption" display="block" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif' }}>
+                        Comment by {comment.anonymous ? 'Anonymous' : comment.name} • {new Date(comment.createdAt).toLocaleString()}
                       </Typography>
                     </>
                   }
@@ -162,7 +207,7 @@ const PostPage = () => {
                 {(user && (user.role === 'Admin' || user.erp === comment.erp)) && (
                   <ListItemSecondaryAction>
                     <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteComment(comment._id)}>
-                      <DeleteIcon />
+                      <DeleteIcon sx={{ color: '#B22222' }} /> {/* Firebrick color for delete icon */}
                     </IconButton>
                   </ListItemSecondaryAction>
                 )}

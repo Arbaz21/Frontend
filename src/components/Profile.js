@@ -131,15 +131,26 @@ const Profile = () => {
     });
 
     return (
-        <Container maxWidth="md">
+        <Container maxWidth="md" sx={{ marginTop: '40px' }}>
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}
                 onClose={() => setOpenSnackbar(false)}
                 message={snackbarMessage}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                sx={{ bgcolor: '#003366', color: '#FFFFFF' }} // Custom styling for Snackbar
             />
-            <Paper sx={{ padding: 3, marginTop: 5 }}>
-                <Typography variant="h4" gutterBottom>
+            <Paper
+                sx={{
+                    padding: 4,
+                    marginTop: 5,
+                    borderRadius: '15px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #FFD700', // Gold color border
+                }}
+            >
+                <Typography variant="h4" gutterBottom sx={{ fontFamily: 'Playfair Display, serif', textAlign: 'center' }}>
                     My Profile
                 </Typography>
                 <Formik
@@ -150,10 +161,10 @@ const Profile = () => {
                 >
                     {({ values, errors, touched, handleChange, setFieldValue }) => (
                         <Form>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
-                                    <Avatar sx={{ width: 100, height: 100, margin: 'auto' }}>
-                                        <img src={userImage || "/default-profile.png"} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <Grid container spacing={3} justifyContent="center">
+                                <Grid item xs={12} textAlign="center">
+                                    <Avatar sx={{ width: 120, height: 120, margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}>
+                                        <img src={userImage || "/default-profile.png"} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                                     </Avatar>
                                     <input
                                         type="file"
@@ -163,7 +174,14 @@ const Profile = () => {
                                         id="profile-picture-upload"
                                     />
                                     <label htmlFor="profile-picture-upload">
-                                        <Button variant="contained" component="span">
+                                        <Button variant="contained" component="span" sx={{
+                                            marginTop: 2,
+                                            backgroundColor: '#003366', // Deep Blue
+                                            '&:hover': {
+                                                backgroundColor: '#002244', // Darker Blue on hover
+                                            },
+                                            color: '#FFFFFF',
+                                        }}>
                                             Change Profile Picture
                                         </Button>
                                     </label>
@@ -177,6 +195,7 @@ const Profile = () => {
                                         onChange={handleChange}
                                         error={touched.firstName && Boolean(errors.firstName)}
                                         helperText={touched.firstName && errors.firstName}
+                                        sx={{ marginBottom: 2 }}
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
@@ -188,6 +207,7 @@ const Profile = () => {
                                         onChange={handleChange}
                                         error={touched.lastName && Boolean(errors.lastName)}
                                         helperText={touched.lastName && errors.lastName}
+                                        sx={{ marginBottom: 2 }}
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
@@ -199,8 +219,20 @@ const Profile = () => {
                                 <Grid item xs={12}>
                                     <Typography variant="subtitle1"><strong>Roles:</strong> {Array.isArray(values.roles) ? values.roles.join(', ') : ''}</Typography>
                                 </Grid>
-                                <Grid item xs={12}>
-                                    <Button type="submit" variant="contained" color="primary">
+                                <Grid item xs={12} textAlign="center">
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        sx={{
+                                            backgroundColor: '#003366', // Deep Blue
+                                            '&:hover': {
+                                                backgroundColor: '#002244', // Darker Blue on hover
+                                            },
+                                            color: '#FFFFFF',
+                                            padding: '10px 20px',
+                                            borderRadius: '8px',
+                                        }}
+                                    >
                                         Save
                                     </Button>
                                 </Grid>

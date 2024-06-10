@@ -1,4 +1,3 @@
-// src/pages/CourseDetailsPage.js
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Typography, CircularProgress, Grid, Paper, Avatar, Button } from '@mui/material';
@@ -31,21 +30,56 @@ const CourseDetailsPage = () => {
   }
 
   return (
-    <Container maxWidth="lg">
-      <Typography variant="h2" align="center" mt={5} mb={3}>{courseDetails.Course_name}</Typography>
-      <Typography variant="body1" align="center">{courseDetails["Course Description"]}</Typography>
+    <Container maxWidth="lg" sx={{ mt: 5 }}>
+      <Typography variant="h2" align="center" gutterBottom sx={{ fontFamily: 'Playfair Display, serif', color: '#003366' }}>
+        {courseDetails.Course_name}
+      </Typography>
+      <Typography variant="body1" align="center" sx={{ fontFamily: 'Roboto, sans-serif', mb: 3, color: '#333' }}>
+        {courseDetails["Course Description"]}
+      </Typography>
 
-      {/* Render Teachers Section */}
-      <Typography variant="h4" align="center" mt={5} mb={3}>Teachers</Typography>
+      {/* Teachers Section */}
+      <Typography variant="h4" align="center" mt={5} mb={3} sx={{ fontFamily: 'Playfair Display, serif', color: '#003366' }}>
+        Teachers
+      </Typography>
       <Grid container spacing={3}>
         {courseDetails.Teachers.map((teacher) => (
           <Grid item xs={12} md={6} key={teacher._id}>
-            <Paper sx={{ padding: 2, display: 'flex', alignItems: 'center' }}>
-              <Avatar src={`data:image/jpeg;base64,${teacher.ImageFile}`} sx={{ marginRight: 2 }} />
+            <Paper
+              sx={{
+                padding: 2,
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: '10px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #FFD700', // Gold color border
+                '&:hover': {
+                  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Hover effect
+                },
+              }}
+            >
+              <Avatar src={`data:image/jpeg;base64,${teacher.ImageFile}`} sx={{ width: 60, height: 60, marginRight: 2 }} />
               <div>
-                <Typography variant="h6">{teacher.Name}</Typography>
-                <Typography variant="subtitle1">{teacher.Title}</Typography>
-                <Button variant="contained" onClick={() => window.location.href = `/teachers/${teacher._id}`}>View Profile</Button>
+                <Typography variant="h6" sx={{ fontFamily: 'Roboto, sans-serif', color: '#003366' }}>
+                  {teacher.Name}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ fontFamily: 'Roboto, sans-serif', color: '#555' }}>
+                  {teacher.Title}
+                </Typography>
+                <Button
+                  variant="contained"
+                  sx={{
+                    mt: 1,
+                    backgroundColor: '#003366', // Deep Blue
+                    '&:hover': {
+                      backgroundColor: '#002244', // Darker Blue on hover
+                    },
+                    color: '#FFFFFF',
+                  }}
+                  onClick={() => window.location.href = `/teachers/${teacher._id}`}
+                >
+                  View Profile
+                </Button>
               </div>
             </Paper>
           </Grid>

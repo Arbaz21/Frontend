@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Container, Grid, Card, CardContent, Typography, CircularProgress, Button, Box, TextField, InputAdornment } from '@mui/material';
+import {
+  Container, Grid, Card, CardContent, Typography, CircularProgress, Button, Box, TextField, InputAdornment
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import SearchIcon from '@mui/icons-material/Search';
@@ -13,7 +15,6 @@ const CoursePage = () => {
   const [searchTerm, setSearchTerm] = useState(''); // For debounced API call
 
   useEffect(() => {
-    console.log(`Fetching courses with search term: "${searchTerm}"`); // Log to verify
     dispatch(fetchCourses({ page: currentPage, limit, search: searchTerm }));
   }, [dispatch, currentPage, limit, searchTerm]);
 
@@ -49,7 +50,9 @@ const CoursePage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Typography variant="h2" align="center" gutterBottom>Courses</Typography>
+      <Typography variant="h2" align="center" gutterBottom sx={{ fontFamily: 'Playfair Display, serif' }}>
+        Courses
+      </Typography>
       
       {/* Search Bar */}
       <Box mb={3} display="flex" justifyContent="center">
@@ -58,7 +61,21 @@ const CoursePage = () => {
           value={searchInput}
           onChange={handleSearchChange}
           variant="outlined"
-          sx={{ width: '60%' }}
+          sx={{
+            width: '60%',
+            borderColor: '#FFD700', // Gold color border
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: '#FFD700', // Gold color border
+              },
+              '&:hover fieldset': {
+                borderColor: '#FFD700', // Gold color on hover
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#FFD700', // Gold color on focus
+              },
+            },
+          }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -70,30 +87,51 @@ const CoursePage = () => {
       </Box>
 
       <Grid container spacing={3}>
-        {courses.map(course => (
-          <Grid item xs={12} sm={6} md={4} key={course._id}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', border: '2px solid maroon', borderRadius: '10px' }}>
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="h5" component="h2" align="center">
-                  <Link to={`/course/${course._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Button fullWidth variant="text">
-                      <b>{course.Course_name}</b>
-                    </Button>
-                  </Link>
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+        {courses.length > 0 ? (
+          courses.map(course => (
+            <Grid item xs={12} sm={6} md={4} key={course._id}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: '10px',
+                  border: '1px solid #FFD700', // Gold color border
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Subtle shadow
+                  '&:hover': {
+                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Hover effect
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="h5"
+                    component="h2"
+                    align="center"
+                    sx={{ fontFamily: 'Playfair Display, serif', color: '#003366' }} // Deep Blue color
+                  >
+                    <Link to={`/course/${course._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      {course.Course_name}
+                    </Link>
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Typography variant="h6" align="center" sx={{ width: '100%', marginTop: 2 }}>
+            No courses found.
+          </Typography>
+        )}
       </Grid>
 
       {/* Pagination Controls */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Button 
-          variant="contained" 
-          onClick={() => handlePageChange(currentPage - 1)} 
+        <Button
+          variant="contained"
+          onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          sx={{ margin: '0 5px' }}
+          sx={{ margin: '0 5px', backgroundColor: '#003366', color: '#FFFFFF', '&:hover': { backgroundColor: '#002244' } }}
         >
           Previous
         </Button>
@@ -102,16 +140,24 @@ const CoursePage = () => {
             key={index + 1}
             variant={index + 1 === currentPage ? 'contained' : 'outlined'}
             onClick={() => handlePageChange(index + 1)}
-            sx={{ margin: '0 5px' }}
+            sx={{
+              margin: '0 5px',
+              backgroundColor: index + 1 === currentPage ? '#003366' : 'transparent',
+              color: index + 1 === currentPage ? '#FFFFFF' : '#003366',
+              borderColor: '#003366',
+              '&:hover': {
+                backgroundColor: index + 1 === currentPage ? '#002244' : 'rgba(0, 51, 102, 0.1)',
+              },
+            }}
           >
             {index + 1}
           </Button>
         ))}
-        <Button 
-          variant="contained" 
-          onClick={() => handlePageChange(currentPage + 1)} 
+        <Button
+          variant="contained"
+          onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          sx={{ margin: '0 5px' }}
+          sx={{ margin: '0 5px', backgroundColor: '#003366', color: '#FFFFFF', '&:hover': { backgroundColor: '#002244' } }}
         >
           Next
         </Button>

@@ -14,11 +14,8 @@ import { fetchUser } from './slices/authSlice';
 import Sidebar from './common/Sidebar';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import Toolbar from '@mui/material/Toolbar';
 import './assets/styles/App.css';
 import Unauthorized from '../src/components/UnAuthorized'; // Adjust the import path if needed
-
-const drawerWidth = 240;
 
 const App = () => {
   const dispatch = useDispatch();
@@ -32,14 +29,19 @@ const App = () => {
 
   return (
     <Router>
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'auto', margin: 0, padding: 0 }}>
         <CssBaseline />
         {isAuthenticated && <Sidebar />}
         <Box
           component="main"
-          sx={{ flexGrow: 1, p: 3, ml: isAuthenticated ? `${drawerWidth}px` : '0' }}
+          sx={{
+            flexGrow: 1,
+            overflowY: 'auto',
+            margin: 0,
+            padding: 0,
+          }}
         >
-          <Toolbar />
+          {/* Remove the <Toolbar /> if not needed */}
           <Routes>
             <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <RegisterPage />} />
             <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <LoginPage />} />
@@ -51,8 +53,7 @@ const App = () => {
             <Route path="/course/:courseId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={CourseDetailsPage} />} />
             <Route path="/posts/:postId" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={PostPage} />} />
             <Route path="/posts" element={<ProtectedRoute isAuthenticated={isAuthenticated} component={HomePage} />} />
-            <Route path="/unauthorized" element={<Unauthorized />} /> {/* Ensure this route points to the Unauthorized component */}
-            {/* <Route path="*" element={<Navigate to="/home" />} /> */}
+            <Route path="/unauthorized" element={<Unauthorized />} />
           </Routes>
         </Box>
       </Box>

@@ -1,27 +1,12 @@
-// src/common/Sidebar.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import CssBaseline from '@mui/material/CssBaseline';
-import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import HomeIcon from '@mui/icons-material/Home';
-import PersonIcon from '@mui/icons-material/Person';
-import SchoolIcon from '@mui/icons-material/School';
-import LogoutIcon from '@mui/icons-material/Logout';
-import Button from '@mui/material/Button';
+import { Box, Drawer, CssBaseline, Toolbar, List, Typography, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Button } from '@mui/material';
+import { Home as HomeIcon, Person as PersonIcon, School as SchoolIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 import { logout } from '../slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 
-const drawerWidth = 200;
+const drawerWidth = 240;
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -31,6 +16,7 @@ const Sidebar = () => {
     dispatch(logout());
     navigate('/login');
   };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -41,45 +27,72 @@ const Sidebar = () => {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
+            backgroundColor: '#003366', // Deep Blue for the sidebar background
+            color: '#FFFFFF', // White text color for contrast
           },
         }}
         variant="permanent"
         anchor="left"
       >
         <Toolbar />
-        <Divider />
+        <Box sx={{ padding: '10px' }}>
+          <Typography variant="h6" sx={{ textAlign: 'center', fontFamily: 'Playfair Display, serif' }}>
+            University App
+          </Typography>
+        </Box>
+        <Divider sx={{ backgroundColor: '#FFD700' }} /> {/* Gold color divider */}
         <List>
           <ListItem component={Link} to="/home" disablePadding>
-            <ListItemButton>
-              <ListItemIcon><HomeIcon /></ListItemIcon>
+            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } }}> {/* Darker Blue on hover */}
+              <ListItemIcon sx={{ color: '#FFD700' }}> {/* Gold color icons */}
+                <HomeIcon />
+              </ListItemIcon>
               <ListItemText primary="Home" />
             </ListItemButton>
           </ListItem>
           <ListItem component={Link} to="/profile" disablePadding>
-            <ListItemButton>
-              <ListItemIcon><PersonIcon /></ListItemIcon>
+            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } }}>
+              <ListItemIcon sx={{ color: '#FFD700' }}>
+                <PersonIcon />
+              </ListItemIcon>
               <ListItemText primary="Profile" />
             </ListItemButton>
           </ListItem>
           <ListItem component={Link} to="/courses" disablePadding>
-            <ListItemButton>
-              <ListItemIcon><SchoolIcon /></ListItemIcon>
+            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } }}>
+              <ListItemIcon sx={{ color: '#FFD700' }}>
+                <SchoolIcon />
+              </ListItemIcon>
               <ListItemText primary="Courses" />
             </ListItemButton>
           </ListItem>
           <ListItem component={Link} to="/teachers" disablePadding>
-            <ListItemButton>
-              <ListItemIcon><PersonIcon /></ListItemIcon>
+            <ListItemButton sx={{ '&:hover': { backgroundColor: '#002244' } }}>
+              <ListItemIcon sx={{ color: '#FFD700' }}>
+                <PersonIcon />
+              </ListItemIcon>
               <ListItemText primary="Teachers" />
             </ListItemButton>
           </ListItem>
         </List>
-        <Divider />
+        <Divider sx={{ backgroundColor: '#FFD700' }} />
         <List>
-         {/* Logout Button */}
           <ListItem>
-            <Button variant="contained" color="error" onClick={handleLogout}>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleLogout}
+              fullWidth
+              sx={{
+                margin: '0 16px',
+                backgroundColor: '#B22222', // Firebrick color for the logout button
+                '&:hover': {
+                  backgroundColor: '#8B0000', // Darker Firebrick on hover
+                },
+              }}
+            >
               Logout
+              <LogoutIcon sx={{ marginLeft: '10px' }} />
             </Button>
           </ListItem>
         </List>

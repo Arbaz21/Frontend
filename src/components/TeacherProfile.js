@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Paper, Avatar, Button, Grid, Card, CardContent, CircularProgress } from '@mui/material';
+import { Container, Typography, Paper, Avatar, Button, Grid, Card, CardContent, CircularProgress,Box } from '@mui/material';
 import { fetchTeacherById, clearSelectedTeacher } from '../slices/teacherSlice';
 import axios from 'axios';
 
@@ -65,37 +65,70 @@ const TeacherProfile = () => {
     };
 
     return (
-        <Container>
-            <Paper sx={{ padding: 3 }}>
-                <Avatar src={`data:image/jpeg;base64,${selectedTeacher.ImageFile}`} sx={{ width: 100, height: 100 }} />
-                <Typography variant="h4">{selectedTeacher.Name}</Typography>
-                <Typography variant="h6">{selectedTeacher.Title}</Typography>
-                <Typography variant="body1">{selectedTeacher.Overview}</Typography>
-                <Typography variant="body1">{`Department: ${selectedTeacher.Department}`}</Typography>
-                <Typography variant="body1">{`Specialization: ${selectedTeacher.Specialization}`}</Typography>
-                <Typography variant="body1">{`Onboard Status: ${selectedTeacher.OnboardStatus}`}</Typography>
+        <Container maxWidth="lg" sx={{ mt: 5 }}>
+            <Paper sx={{
+                padding: 4,
+                borderRadius: '15px',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #FFD700', // Gold color border
+            }}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} sm={4} md={3}>
+                        <Avatar 
+                            src={`data:image/jpeg;base64,${selectedTeacher.ImageFile}`} 
+                            sx={{ width: 120, height: 120, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }} 
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={8} md={9}>
+                        <Typography variant="h4" gutterBottom sx={{ fontFamily: 'Playfair Display, serif', color: '#003366' }}>
+                            {selectedTeacher.Name}
+                        </Typography>
+                        <Typography variant="h6" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif', color: '#555' }}>
+                            {selectedTeacher.Title}
+                        </Typography>
+                        <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif', color: '#333' }}>
+                            {selectedTeacher.Overview}
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontFamily: 'Roboto, sans-serif', color: '#333' }}>
+                            <strong>Department:</strong> {selectedTeacher.Department}
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontFamily: 'Roboto, sans-serif', color: '#333' }}>
+                            <strong>Specialization:</strong> {selectedTeacher.Specialization}
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontFamily: 'Roboto, sans-serif', color: '#333' }}>
+                            <strong>Onboard Status:</strong> {selectedTeacher.OnboardStatus}
+                        </Typography>
+                    </Grid>
+                </Grid>
 
                 {/* Display Courses as Clickable Tiles */}
-                <Typography variant="h5" sx={{ marginTop: 2 }}>Courses Taught:</Typography>
+                <Typography variant="h5" sx={{ marginTop: 4, fontFamily: 'Playfair Display, serif', color: '#003366' }}>
+                    Courses Taught:
+                </Typography>
                 {courses.length > 0 ? (
                     <Grid container spacing={2} sx={{ mt: 2 }}>
                         {courses.map((courseName, index) => (
                             <Grid item xs={12} sm={6} md={4} key={courseIDs[index]}>
                                 <Card
-                                    sx={{ 
-                                        height: '100%', 
-                                        display: 'flex', 
-                                        flexDirection: 'column', 
-                                        justifyContent: 'center', 
+                                    sx={{
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
                                         alignItems: 'center',
-                                        border: '2px solid maroon',
                                         borderRadius: '10px',
-                                        cursor: 'pointer'
+                                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                                        border: '1px solid #FFD700', // Gold color border
+                                        cursor: 'pointer',
+                                        '&:hover': {
+                                            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Hover effect
+                                        },
                                     }}
                                     onClick={() => navigate(`/course/${courseIDs[index]}`)}
                                 >
                                     <CardContent>
-                                        <Typography variant="h6" align="center">
+                                        <Typography variant="h6" align="center" sx={{ fontFamily: 'Roboto, sans-serif', color: '#003366' }}>
                                             {courseName}
                                         </Typography>
                                     </CardContent>
@@ -107,8 +140,35 @@ const TeacherProfile = () => {
                     <Typography>No courses available.</Typography>
                 )}
 
-                <Button variant="contained" onClick={() => navigate(`/teachers/edit/${selectedTeacher._id}`)}>Edit</Button>
-                <Button variant="contained" color="secondary" onClick={handleDelete}>Delete</Button>
+                <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            backgroundColor: '#003366', // Deep Blue
+                            '&:hover': {
+                                backgroundColor: '#002244', // Darker Blue on hover
+                            },
+                            color: '#FFFFFF',
+                            mr: 2,
+                        }}
+                        onClick={() => navigate(`/teachers/edit/${selectedTeacher._id}`)}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleDelete}
+                        sx={{
+                            backgroundColor: '#B22222', // Firebrick Red
+                            '&:hover': {
+                                backgroundColor: '#8B0000', // Darker Red on hover
+                            },
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </Box>
             </Paper>
         </Container>
     );

@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 import axios from 'axios';
 import {
   Box, Container, Grid, Paper, Typography, Button, IconButton,
-  TextField, List, ListItem, ListItemText, ListItemSecondaryAction,
+  TextField, ListItem, ListItemText, ListItemSecondaryAction,
   Badge, Avatar, CircularProgress, Alert, Snackbar, FormControlLabel, Checkbox
 } from '@mui/material';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
@@ -107,13 +107,27 @@ const HomePage = () => {
   };
 
   return (
-    <Box sx={{ marginTop: '20px', backgroundImage: 'url("background.jpeg")', backgroundSize: 'cover', minHeight: '100vh', padding: '20px' }}>
+    <Box sx={{
+      marginTop: '20px',
+      backgroundImage: 'url("background.jpeg")',
+      backgroundSize: 'cover',
+      minHeight: '100vh',
+      padding: '20px',
+      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    }}>
       <Container maxWidth="lg">
         <ToastContainer />
         <Grid container spacing={3}>
           <Grid item xs={12} md={9}>
-            <Paper elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
-              <Typography variant="h5" gutterBottom>
+            <Paper elevation={3} sx={{
+              marginBottom: '20px',
+              padding: '20px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #FFD700', // Gold color border for the paper
+            }}>
+              <Typography variant="h5" gutterBottom sx={{ fontFamily: 'Playfair Display, serif' }}>
                 What's on your mind?
               </Typography>
               <form onSubmit={formik.handleSubmit}>
@@ -155,37 +169,57 @@ const HomePage = () => {
                   }
                   label="Post anonymously"
                 />
-                <Button type="submit" variant="contained" color="error" disabled={loading}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={loading}
+                  sx={{
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    backgroundColor: '#003366', // Deep Blue
+                    '&:hover': {
+                      backgroundColor: '#002244', // Darker Blue on hover
+                    }
+                  }}
+                >
                   {loading ? <CircularProgress size={24} color="inherit" /> : 'Post'}
                 </Button>
               </form>
             </Paper>
-            {/* {loading && <CircularProgress />} */}
             {error && <Alert severity="error">{error}</Alert>}
             {!loading && !error && posts.slice().reverse().map(post => (
               post && post.title && post.content && (
-                <Paper key={post._id} elevation={3} sx={{ marginBottom: '20px', padding: '20px', border: '2px solid darkred' }}>
+                <Paper key={post._id} elevation={3} sx={{
+                  marginBottom: '20px',
+                  padding: '20px',
+                  borderRadius: '10px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid #FFD700', // Gold color border for the posts
+                }}>
                   <Typography
                     variant="h5"
                     gutterBottom
                     onClick={() => navigate(`/posts/${post._id}`)}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ cursor: 'pointer', fontFamily: 'Playfair Display, serif' }}
                   >
                     <strong>{post.title}</strong>
                   </Typography>
                   <ListItem alignItems="flex-start">
                     <Avatar alt={getCreatedByText(post.createdBy)} src="/static/images/avatar/1.jpg" sx={{ marginRight: '10px' }} />
                     <ListItemText
-                      primary={post.title}
+                      primary={<Typography variant="body1" sx={{ fontFamily: 'Roboto, sans-serif' }}>{post.title}</Typography>}
                       secondary={
                         <>
-                          <Typography component="span" variant="body2" color="textPrimary">
+                          <Typography component="span" variant="body2" color="textPrimary" sx={{ fontFamily: 'Roboto, sans-serif' }}>
                             {post.content}
                           </Typography>
-                          <Typography variant="caption" display="block" gutterBottom>
+                          <Typography variant="caption" display="block" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif' }}>
                             Posted by {getCreatedByText(post.createdBy)} • {formatDate(post.createdAt)}
                           </Typography>
-                          <Typography variant="caption" display="block" gutterBottom>
+                          <Typography variant="caption" display="block" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif' }}>
                             {post.upvotes} upvotes • {post.downvotes} downvotes
                           </Typography>
                         </>

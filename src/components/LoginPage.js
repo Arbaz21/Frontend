@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { TextField, Button, Container, Paper, Typography, Alert, Box, Grid, FormControl, InputLabel, Select, MenuItem, Modal, Backdrop, Fade } from '@mui/material';
+import {
+    TextField, Button, Container, Paper, Typography, Alert, Box, Grid,
+    FormControl, InputLabel, Select, MenuItem, Modal, Backdrop, Fade
+} from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
@@ -68,21 +71,29 @@ const LoginPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundImage: `url('/background.jpeg')`,
+                backgroundImage: `url('/background.jpeg')`, // Replace with a suitable background image URL
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
             }}
         >
             <Container maxWidth="md">
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={8}>
-                        <Paper elevation={10} sx={{ padding: '20px', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
-                            <Typography variant="h5" gutterBottom sx={{ textAlign: 'center' }}>
+                <Grid container justifyContent="center">
+                    <Grid item xs={12} sm={8} md={6}>
+                        <Paper
+                            elevation={10}
+                            sx={{
+                                padding: '30px',
+                                borderRadius: '15px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            }}
+                        >
+                            <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', fontFamily: 'Playfair Display, serif' }}>
                                 Login
                             </Typography>
                             {error && <Alert severity="error">{error}</Alert>}
-                            <form onSubmit={formik.handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <form onSubmit={formik.handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 <TextField
                                     name="email"
                                     label="Email"
@@ -92,6 +103,7 @@ const LoginPage = () => {
                                     onBlur={formik.handleBlur}
                                     error={formik.touched.email && Boolean(formik.errors.email)}
                                     helperText={formik.touched.email && formik.errors.email}
+                                    fullWidth
                                 />
                                 <TextField
                                     name="password"
@@ -103,6 +115,7 @@ const LoginPage = () => {
                                     onBlur={formik.handleBlur}
                                     error={formik.touched.password && Boolean(formik.errors.password)}
                                     helperText={formik.touched.password && formik.errors.password}
+                                    fullWidth
                                 />
                                 {/* Role selection dropdown */}
                                 <FormControl variant="outlined" fullWidth>
@@ -117,10 +130,25 @@ const LoginPage = () => {
                                         <MenuItem value="Admin">Admin</MenuItem>
                                     </Select>
                                 </FormControl>
-                                <Button type="submit" variant="contained" color="primary">Login</Button>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{
+                                        padding: '10px 20px',
+                                        borderRadius: '8px',
+                                        fontSize: '16px',
+                                        backgroundColor: '#003366', // Deep Blue
+                                        '&:hover': {
+                                            backgroundColor: '#002244', // Darker Blue
+                                        }
+                                    }}
+                                >
+                                    Login
+                                </Button>
                             </form>
                             <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '16px' }}>
-                                New User? <a href="/">Sign Up</a>
+                                New User? <a href="/" style={{ color: '#FFD700' }}>Sign Up</a> {/* Gold color for link */}
                             </Typography>
                         </Paper>
                     </Grid>
@@ -148,9 +176,10 @@ const LoginPage = () => {
                             border: '2px solid #000',
                             boxShadow: 24,
                             p: 4,
+                            borderRadius: '10px',
                         }}
                     >
-                        <Typography variant="h6" component="h2">
+                        <Typography variant="h6" component="h2" sx={{ fontFamily: 'Playfair Display, serif' }}>
                             Role Error
                         </Typography>
                         <Typography sx={{ mt: 2 }}>
